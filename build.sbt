@@ -6,7 +6,7 @@ scalaVersion := "2.13.5"
 
 idePackagePrefix := Some("com.zkerriga.server")
 
-lazy val AkkaVersion = "2.6.8"
+lazy val AkkaVersion = "2.6.13"
 lazy val AkkaHttpVersion = "10.2.4"
 lazy val circeVersion = "0.13.0"
 lazy val tapirVersion = "0.18.0-M4"
