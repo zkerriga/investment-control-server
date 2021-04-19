@@ -20,5 +20,11 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick-hikaricp" % "3.3.3",
   "com.h2database" % "h2" % "1.4.200",
 
+  // monix
+  "io.monix" %% "monix" % "3.3.0",
+
+  // logging
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
+
   "org.scalatest" %% "scalatest" % "3.2.2" % Test,
 )
