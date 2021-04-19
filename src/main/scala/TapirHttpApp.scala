@@ -18,7 +18,7 @@ object TapirHttpApp {
     val server = Server()
     val program = for {
       http <- server.start
-      _ <- Console.putAnyLn("Press RETURN to stop server...")
+      _ <- Console.putAnyLn("Press ENTER to stop server...")
       _ <- Console.readLine
       _ <- server.stop(http)
       _ <- terminateSystem
