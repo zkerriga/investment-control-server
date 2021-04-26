@@ -1,9 +1,7 @@
-package com.zkerriga.server
-package logic
+package ru.zkerriga.investment.logic
 
-import monix.eval.Task
-import database.ServerDatabase
-import domain.Login
+import ru.zkerriga.investment.database.ServerDatabase
+import ru.zkerriga.investment.domain.Login
 
 import scala.concurrent.{ExecutionContext, Future}
 

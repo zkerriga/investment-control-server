@@ -1,12 +1,9 @@
-package com.zkerriga.server
-package tapir
+package ru.zkerriga.investment.tapir
 
-import monix.eval.Task
 import sttp.tapir.generic.auto.schemaForCaseClass
 import sttp.tapir.json.circe.jsonBody
-import sttp.tapir.server.ServerEndpoint
-import domain.Login
-import logic.ServiceLogic
+import ru.zkerriga.investment.domain.Login
+import ru.zkerriga.investment.logic.ServiceLogic
 
 import scala.concurrent.{ExecutionContext, Future}
 

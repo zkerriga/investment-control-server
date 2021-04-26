@@ -1,5 +1,4 @@
-package com.zkerriga.server
-package database
+package ru.zkerriga.investment.database
 
 import slick.dbio.Effect
 import slick.jdbc.H2Profile.api._

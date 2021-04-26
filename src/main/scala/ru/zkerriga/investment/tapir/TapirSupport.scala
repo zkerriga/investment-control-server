@@ -1,5 +1,4 @@
-package com.zkerriga.server
-package tapir
+package ru.zkerriga.investment.tapir
 
 trait TapirSupport {
 

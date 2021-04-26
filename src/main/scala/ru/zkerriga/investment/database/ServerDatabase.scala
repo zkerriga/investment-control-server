@@ -1,7 +1,5 @@
-package com.zkerriga.server
-package database
+package ru.zkerriga.investment.database
 
-import monix.eval.Task
 import slick.lifted.TableQuery
 import slick.jdbc.H2Profile.api._
 

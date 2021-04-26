@@ -1,4 +1,4 @@
-package com.zkerriga.server
+package ru.zkerriga.investment
 
 import slick.dbio.{DBIO, DBIOAction, Effect, NoStream}
 

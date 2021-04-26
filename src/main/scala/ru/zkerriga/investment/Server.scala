@@ -1,4 +1,4 @@
-package com.zkerriga.server
+package ru.zkerriga.investment
 
 import akka.Done
 import akka.actor.ActorSystem

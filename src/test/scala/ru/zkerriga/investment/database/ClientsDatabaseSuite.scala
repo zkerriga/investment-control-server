@@ -1,11 +1,10 @@
-package com.zkerriga.server
-package database
+package ru.zkerriga.investment.database
 
 import org.scalactic.source
 import org.scalatest.compatible
 import org.scalatest.funsuite.AsyncFunSuite
 
-import database.ClientsQueryRepository.AllClients
+import ClientsQueryRepository.AllClients
 
 import slick.dbio.{DBIOAction, Effect, NoStream}
 import slick.jdbc.JdbcBackend.Database

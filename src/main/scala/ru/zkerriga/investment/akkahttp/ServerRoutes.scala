@@ -1,5 +1,4 @@
-package com.zkerriga.server
-package akkahttp
+package ru.zkerriga.investment.akkahttp
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Route

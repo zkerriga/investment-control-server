@@ -1,8 +1,7 @@
-package com.zkerriga.server
-package database
+package ru.zkerriga.investment.database
 
 import org.scalatest.matchers.should.Matchers
-import database.ClientsQueryRepository._
+import ClientsQueryRepository._
 
 
 class ClientsQueryRepositoryTest extends ClientsDatabaseSuite with Matchers {

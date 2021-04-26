@@ -1,5 +1,4 @@
-package com.zkerriga.server
-package utils
+package ru.zkerriga.investment.utils
 
 import monix.eval.Task
 
