@@ -6,21 +6,19 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.RouteConcatenation._
 import monix.eval.Task
-
 import sttp.tapir.docs.openapi.OpenAPIDocsInterpreter
 import sttp.tapir.openapi.circe.yaml._
 import sttp.tapir.server.akkahttp.AkkaHttpServerInterpreter
 import sttp.tapir.swagger.akkahttp.SwaggerAkka
 
 import scala.concurrent.ExecutionContext
-
-import logic.ServiceLogic
+import api.{ServiceApi, ServiceApiImpl}
 import routes.TapirRoutes
 
 
 case class Server(interface: String, port: Int)(implicit as: ActorSystem, ec: ExecutionContext) {
 
-  private val service = new ServiceLogic
+  private val service: ServiceApi = new ServiceApiImpl
   private val endpoints = new TapirRoutes(service)
 
   private val routes: Route = AkkaHttpServerInterpreter.toRoute(endpoints.all)

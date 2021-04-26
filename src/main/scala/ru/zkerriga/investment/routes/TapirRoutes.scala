@@ -3,12 +3,12 @@ package ru.zkerriga.investment.routes
 import sttp.tapir.generic.auto.schemaForCaseClass
 import sttp.tapir.json.circe.jsonBody
 import ru.zkerriga.investment.entities.Login
-import ru.zkerriga.investment.logic.ServiceLogic
+import ru.zkerriga.investment.api.ServiceApi
 
 import scala.concurrent.{ExecutionContext, Future}
 
 
-class TapirRoutes(serviceLogic: ServiceLogic)(implicit ec: ExecutionContext) extends TapirSupport {
+class TapirRoutes(serviceApi: ServiceApi)(implicit ec: ExecutionContext) extends TapirSupport {
 
   import sttp.tapir._
 
@@ -22,7 +22,7 @@ class TapirRoutes(serviceLogic: ServiceLogic)(implicit ec: ExecutionContext) ext
       .in(jsonBody[Login])
       .out(jsonBody[Int])
       .serverLogic[Future] { login =>
-        serviceLogic.registerClient(login)
+        serviceApi.registerClient(login)
           .recover{ case _ => 0 }
           .map(Right.apply)
       }
