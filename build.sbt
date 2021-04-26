@@ -27,8 +27,6 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
   "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
   "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
-  "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion,
-  "com.typesafe.akka" %% "akka-http-testkit" % AkkaHttpVersion,
 
   // slick
   "com.typesafe.slick" %% "slick" % "3.3.3",
@@ -43,4 +41,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
 
   "org.scalatest" %% "scalatest" % "3.2.2" % Test,
+  "org.scalamock" %% "scalamock" % "4.4.0" % Test,
+  "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion % Test,
+  "com.typesafe.akka" %% "akka-http-testkit" % AkkaHttpVersion % Test,
 )
