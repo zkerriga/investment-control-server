@@ -17,6 +17,7 @@ import routes.TapirRoutes
 
 
 case class Server(interface: String, port: Int)(implicit as: ActorSystem, s: Scheduler) {
+  val link = s"http://$interface:$port"
 
   private val service: ServiceApi = new ServiceApiImpl
   private val endpoints = new TapirRoutes(service)
@@ -33,7 +34,10 @@ case class Server(interface: String, port: Int)(implicit as: ActorSystem, s: Sch
     Http()
       .newServerAt(interface, port)
       .bind(routes ~ swagger)
-  } <* logging.Console.putAnyLn(s"Server started at: http://$interface:$port")
+  } <* logging.Console.putAnyLn(
+    s"""Server started at: $link
+       |See the documentation at: $link/docs""".stripMargin
+  )
 
   def stop(http: Http.ServerBinding): Task[Done] = Task.fromFuture {
     http.unbind()

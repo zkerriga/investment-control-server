@@ -2,12 +2,11 @@ package ru.zkerriga.investment.routes
 
 import sttp.tapir.generic.auto.schemaForCaseClass
 import sttp.tapir.json.circe.jsonBody
-
 import monix.execution.Scheduler
-import scala.concurrent.Future
 
+import scala.concurrent.Future
 import ru.zkerriga.investment.entities.Login
-import ru.zkerriga.investment.api.ServiceApi
+import ru.zkerriga.investment.api.{ExceptionResponse, ServiceApi}
 
 
 class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends TapirSupport {
@@ -20,13 +19,12 @@ class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends TapirSu
   val register =
     apiEndpoint.post
       .description("Registering a new client")
-      .in("login")
+      .in("register")
       .in(jsonBody[Login])
       .out(jsonBody[Int])
+      .errorOut(jsonBody[ExceptionResponse].description("The login may be busy"))
       .serverLogic[Future] { login =>
-        serviceApi.registerClient(login)
-          .onErrorRecover{ case _ => 0 }
-          .map(Right.apply).runToFuture
+        handleErrors(serviceApi.registerClient(login)).runToFuture
       }
 
   val all = List(register)
