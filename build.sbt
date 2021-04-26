@@ -4,8 +4,6 @@ version := "0.1"
 
 scalaVersion := "2.13.5"
 
-idePackagePrefix := Some("com.zkerriga.server")
-
 lazy val AkkaVersion = "2.6.13"
 lazy val AkkaHttpVersion = "10.2.4"
 lazy val circeVersion = "0.13.0"
