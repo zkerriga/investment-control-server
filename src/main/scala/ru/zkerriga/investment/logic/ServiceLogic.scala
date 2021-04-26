@@ -1,7 +1,7 @@
 package ru.zkerriga.investment.logic
 
-import ru.zkerriga.investment.database.ServerDatabase
-import ru.zkerriga.investment.domain.Login
+import ru.zkerriga.investment.storage.ServerDatabase
+import ru.zkerriga.investment.entities.Login
 
 import scala.concurrent.{ExecutionContext, Future}
 

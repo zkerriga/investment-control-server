@@ -1,8 +1,8 @@
-package ru.zkerriga.investment.tapir
+package ru.zkerriga.investment.routes
 
 import sttp.tapir.generic.auto.schemaForCaseClass
 import sttp.tapir.json.circe.jsonBody
-import ru.zkerriga.investment.domain.Login
+import ru.zkerriga.investment.entities.Login
 import ru.zkerriga.investment.logic.ServiceLogic
 
 import scala.concurrent.{ExecutionContext, Future}

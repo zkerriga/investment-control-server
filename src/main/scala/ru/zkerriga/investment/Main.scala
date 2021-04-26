@@ -5,17 +5,17 @@ import akka.actor.ActorSystem
 import scala.concurrent.ExecutionContext
 import monix.eval.Task
 
-import utils.Console
+import logging.Console
 
 
-object TapirHttpApp {
+object Main {
   implicit val as: ActorSystem = ActorSystem()
   implicit val ec: ExecutionContext = as.dispatcher
 
   private def terminateSystem = Task.fromFuture(as.terminate())
 
   def main(args: Array[String]): Unit = {
-    val server = Server()
+    val server = Server("localhost", 8080)
     val program = for {
       http <- server.start
       _ <- Console.putAnyLn("Press ENTER to stop server...")

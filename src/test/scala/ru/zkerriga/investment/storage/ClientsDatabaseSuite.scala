@@ -1,4 +1,4 @@
-package ru.zkerriga.investment.database
+package ru.zkerriga.investment.storage
 
 import org.scalactic.source
 import org.scalatest.compatible

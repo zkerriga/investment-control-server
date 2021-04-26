@@ -1,4 +1,4 @@
-package ru.zkerriga.investment.utils
+package ru.zkerriga.investment.logging
 
 import monix.eval.Task
 

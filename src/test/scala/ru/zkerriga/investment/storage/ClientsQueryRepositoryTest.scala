@@ -1,4 +1,4 @@
-package ru.zkerriga.investment.database
+package ru.zkerriga.investment.storage
 
 import org.scalatest.matchers.should.Matchers
 import ClientsQueryRepository._

@@ -1,4 +1,4 @@
-package ru.zkerriga.investment.domain
+package ru.zkerriga.investment.entities
 
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}

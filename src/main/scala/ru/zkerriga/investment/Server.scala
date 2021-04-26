@@ -15,13 +15,10 @@ import sttp.tapir.swagger.akkahttp.SwaggerAkka
 import scala.concurrent.ExecutionContext
 
 import logic.ServiceLogic
-import tapir.TapirRoutes
+import routes.TapirRoutes
 
 
-case class Server()(implicit as: ActorSystem, ec: ExecutionContext) {
-
-  val interface = "localhost"
-  val port = 8080
+case class Server(interface: String, port: Int)(implicit as: ActorSystem, ec: ExecutionContext) {
 
   private val service = new ServiceLogic
   private val endpoints = new TapirRoutes(service)
@@ -38,10 +35,10 @@ case class Server()(implicit as: ActorSystem, ec: ExecutionContext) {
     Http()
       .newServerAt(interface, port)
       .bind(routes ~ swagger)
-  } <* utils.Console.putAnyLn(s"Server started at: http://$interface:$port")
+  } <* logging.Console.putAnyLn(s"Server started at: http://$interface:$port")
 
   def stop(http: Http.ServerBinding): Task[Done] = Task.fromFuture {
     http.unbind()
-  } <* utils.Console.putAnyLn(s"Server stopped")
+  } <* logging.Console.putAnyLn(s"Server stopped")
 
 }
