@@ -1,8 +1,6 @@
 package ru.zkerriga.investment
 
 import akka.actor.ActorSystem
-
-import scala.concurrent.ExecutionContext
 import monix.eval.Task
 
 import logging.Console
@@ -10,7 +8,7 @@ import logging.Console
 
 object Main {
   implicit val as: ActorSystem = ActorSystem()
-  implicit val ec: ExecutionContext = as.dispatcher
+  import monix.execution.Scheduler.Implicits.global
 
   private def terminateSystem = Task.fromFuture(as.terminate())
 
@@ -24,7 +22,6 @@ object Main {
       _ <- terminateSystem
     } yield ()
 
-    import monix.execution.Scheduler.Implicits.global
     program.runSyncUnsafe()
   }
 

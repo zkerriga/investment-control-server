@@ -1,8 +1,8 @@
 package ru.zkerriga.investment.api
 
+import monix.eval.Task
 import ru.zkerriga.investment.entities.Login
 
-import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * Called in Routes,
@@ -14,5 +14,5 @@ trait ServiceApi {
    * @return a positive number if the operation was successful,
    *         and a LoginAlreadyExist exception otherwise
    */
-  def registerClient(login: Login)(implicit ec: ExecutionContext): Future[Int]
+  def registerClient(login: Login): Task[Int]
 }
