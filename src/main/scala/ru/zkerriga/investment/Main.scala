@@ -2,13 +2,13 @@ package ru.zkerriga.investment
 
 import akka.actor.ActorSystem
 import monix.eval.Task
-
 import logging.Console
+import monix.execution.Scheduler
 
 
 object Main {
   implicit val as: ActorSystem = ActorSystem()
-  import monix.execution.Scheduler.Implicits.global
+  implicit val s: Scheduler = monix.execution.Scheduler.global
 
   private def terminateSystem = Task.fromFuture(as.terminate())
 

@@ -11,8 +11,8 @@ import ru.zkerriga.investment.entities.Login
 trait ServiceApi {
   /**
    * Register a new client with a unique login.
-   * @return a positive number if the operation was successful,
+   * @return a login if the operation was successful,
    *         and a LoginAlreadyExist exception otherwise
    */
-  def registerClient(login: Login): Task[Int]
+  def registerClient(login: Login): Task[String]
 }

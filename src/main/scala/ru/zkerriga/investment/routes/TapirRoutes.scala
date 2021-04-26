@@ -21,7 +21,7 @@ class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends TapirSu
       .description("Registering a new client")
       .in("register")
       .in(jsonBody[Login])
-      .out(jsonBody[Int])
+      .out(jsonBody[String].description("Returns the login in case of successful registration"))
       .errorOut(jsonBody[ExceptionResponse].description("The login may be busy"))
       .serverLogic[Future] { login =>
         handleErrors(serviceApi.registerClient(login)).runToFuture
