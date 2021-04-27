@@ -9,7 +9,7 @@ import ru.zkerriga.investment.base.ServerISpecBase
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
 
-class ServerSpec extends ServerISpecBase{
+class ServerSpec extends ServerISpecBase {
 
   implicit lazy val as: ActorSystem = ActorSystem()
   implicit lazy val s: Scheduler = monix.execution.Scheduler.global

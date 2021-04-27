@@ -25,7 +25,7 @@ object SimpleHttpClient extends LazyLogging {
   }
 
   private def logRequest(uri: Uri, method: HttpMethod): Unit =
-    logger.debug(s"Http request sent: ${method.value} $uri")
+    logger.info(s"Http request sent: ${method.value} $uri")
 
   private def logResponse(response: HttpResponse): Unit =
     logger.debug(s"Received response: code=${response.status}")
