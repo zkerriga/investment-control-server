@@ -7,13 +7,10 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalamock.scalatest.MockFactory
 
-import ru.zkerriga.investment.api.ServiceApi
 import ru.zkerriga.investment.entities.Login
 
 trait ServerApiSpecBase extends AnyFunSpec with ScalatestRouteTest with Matchers with MockFactory {
 
-//  import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-//  import io.circe._, io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
   import io.circe.syntax._
 
   def route: Route
@@ -27,12 +24,10 @@ trait ServerApiSpecBase extends AnyFunSpec with ScalatestRouteTest with Matchers
 
       Post(s"$api/register", HttpEntity(ContentTypes.`application/json`, login.asJson.noSpaces)) ~> route ~> check {
         status shouldEqual StatusCodes.OK
-        responseAs[String] shouldBe login.login
+        responseAs[String] shouldBe login.login.asJson.noSpaces
       }
     }
 
   }
-
-  protected val mockServiceApi: ServiceApi = mock[ServiceApi]
 
 }
