@@ -30,7 +30,6 @@ libraryDependencies ++= Seq(
 
   // slick
   "com.typesafe.slick" %% "slick" % "3.3.3",
-  "org.slf4j" % "slf4j-nop" % "1.6.4",
   "com.typesafe.slick" %% "slick-hikaricp" % "3.3.3",
   "com.h2database" % "h2" % "1.4.200",
 
@@ -39,6 +38,7 @@ libraryDependencies ++= Seq(
 
   // logging
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
+  "org.slf4j" % "slf4j-simple" % "1.7.28",
 
   "org.scalatest" %% "scalatest" % "3.2.2" % Test,
   "org.scalamock" %% "scalamock" % "4.4.0" % Test,
