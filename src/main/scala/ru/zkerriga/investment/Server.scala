@@ -11,12 +11,13 @@ import sttp.tapir.docs.openapi.OpenAPIDocsInterpreter
 import sttp.tapir.openapi.circe.yaml._
 import sttp.tapir.server.akkahttp.AkkaHttpServerInterpreter
 import sttp.tapir.swagger.akkahttp.SwaggerAkka
+import com.typesafe.scalalogging._
 import api.{ServiceApi, ServiceApiImpl}
-
 import routes.TapirRoutes
 
 
-case class Server(interface: String, port: Int)(implicit as: ActorSystem, s: Scheduler) {
+case class Server(interface: String, port: Int)(implicit as: ActorSystem, s: Scheduler) extends LazyLogging {
+
   val link = s"http://$interface:$port"
 
   private val service: ServiceApi = new ServiceApiImpl
@@ -34,13 +35,20 @@ case class Server(interface: String, port: Int)(implicit as: ActorSystem, s: Sch
     Http()
       .newServerAt(interface, port)
       .bind(routes ~ swagger)
-  } <* logging.Console.putAnyLn(
-    s"""Server started at: $link
-       |See the documentation at: $link/docs""".stripMargin
-  )
+      .andThen{ case _ =>
+        logger.info(
+          s"""Server started at: $link
+             |See the documentation at: $link/docs""".stripMargin
+        )
+      }
+  }
 
   def stop(http: Http.ServerBinding): Task[Done] = Task.fromFuture {
-    http.unbind()
-  } <* logging.Console.putAnyLn(s"Server stopped")
+    http
+      .unbind()
+      .andThen{ case _ =>
+        logger.info("Server stopped.")
+      }
+  }
 
 }
