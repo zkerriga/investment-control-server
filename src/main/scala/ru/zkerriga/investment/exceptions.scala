@@ -7,3 +7,6 @@ final case class LoginNotFound(login: String)
 
 final case class LoginAlreadyExist(login: String)
   extends ServiceException(s"Login `$login` already exist")
+
+final case class IncorrectCredentials()
+  extends ServiceException(s"Incorrect login or password")
