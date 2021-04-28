@@ -24,4 +24,7 @@ object ServerDatabase {
 
   def findClientByLogin(login: String): Task[Option[Client]] =
     run(ClientsQueryRepository.findByLogin(login))
+
+  def updateClientToken(clientId: Long, token: String): Task[Int] =
+    run(ClientsQueryRepository.updateToken(clientId, token))
 }

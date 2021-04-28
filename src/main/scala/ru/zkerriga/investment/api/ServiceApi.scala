@@ -1,7 +1,9 @@
 package ru.zkerriga.investment.api
 
 import monix.eval.Task
-import ru.zkerriga.investment.entities.Login
+import sttp.tapir.model.UsernamePassword
+import ru.zkerriga.investment.entities.{Login, TinkoffToken}
+import ru.zkerriga.investment.storage.Client
 
 
 /**
@@ -15,4 +17,18 @@ trait ServiceApi {
    *         and a LoginAlreadyExist exception otherwise
    */
   def registerClient(login: Login): Task[String]
+
+  /**
+   * Verifies the client's credentials.
+   * @return Information about the client from the database if successful,
+   *         and a IncorrectCredentials exception otherwise
+   */
+  def verifyCredentials(credentials: UsernamePassword): Task[Client]
+
+  /**
+   * Updates the token of an existing token.
+   * @param client must exist in the database!
+   * @return a login if the operation was successful
+   */
+  def updateToken(client: Client, token: TinkoffToken): Task[String]
 }

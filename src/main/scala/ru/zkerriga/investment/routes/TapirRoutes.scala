@@ -5,8 +5,12 @@ import sttp.tapir.json.circe.jsonBody
 import monix.execution.Scheduler
 
 import scala.concurrent.Future
-import ru.zkerriga.investment.entities.Login
+import sttp.tapir.model.UsernamePassword
+import sttp.tapir.server.ServerEndpoint
+
+import ru.zkerriga.investment.entities.{Login, TinkoffToken}
 import ru.zkerriga.investment.api.{ExceptionResponse, ServiceApi}
+import ru.zkerriga.investment.storage.Client
 
 
 class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends TapirSupport {
@@ -16,7 +20,26 @@ class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends TapirSu
   private val apiEndpoint =
     endpoint.in("api" / "v1" / "investment")
 
-  val register =
+  private val authEndpoint =
+    apiEndpoint
+      .in(auth.basic[UsernamePassword]())
+      .errorOut(jsonBody[ExceptionResponse].description("If authentication failed"))
+      .serverLogicForCurrent[Client, Future] { credentials =>
+        handleErrors(serviceApi.verifyCredentials(credentials)).runToFuture
+      }
+
+  val updateToken: ServerEndpoint[(UsernamePassword, TinkoffToken), ExceptionResponse, String, Any, Future] =
+    authEndpoint.put
+      .description("Token Update for Tinkoff Investments")
+      .in("update" / "token")
+      .in(jsonBody[TinkoffToken])
+      .out(jsonBody[String].description("Returns the login in case of successful registration"))
+      .serverLogic {
+        case (client: Client, token: TinkoffToken) =>
+          serviceApi.updateToken(client, token).map(Right.apply).runToFuture
+      }
+
+  val register: ServerEndpoint[Login, ExceptionResponse, String, Any, Future] =
     apiEndpoint.post
       .description("Registering a new client")
       .in("register")
@@ -27,5 +50,5 @@ class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends TapirSu
         handleErrors(serviceApi.registerClient(login)).runToFuture
       }
 
-  val all = List(register)
+  val all = List(register, updateToken)
 }
