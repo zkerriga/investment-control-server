@@ -16,23 +16,26 @@ class ClientsQueryRepositoryTest extends ClientsDatabaseSuite with Matchers {
     for {
       found <- findByLogin("login1")
     } yield assert(found.fold(false)(client => client.login === "login1"))
+    for {
+      found <- findById(1)
+    } yield assert(found.fold(false)(client => client.login === "login1"))
   }
 
   test("inactive client") {
     for {
-      _ <- inactiveClient("login1")
+      _ <- inactiveClient(1)
       found <- findByLogin("login1")
     } yield assert(found.fold(false)(_.active === false))
   }
 
   test("update token") {
     for {
-      _ <- updateToken("login1", "token:something1")
+      _ <- updateToken(1, "token:something1")
       found <- findByLogin("login1")
     } yield assert(found.fold(false)(_.token === Some("token:something1")))
 
     for {
-      _ <- updateToken("login2", "token:new2")
+      _ <- updateToken(2, "token:new2")
       found <- findByLogin("login2")
     } yield assert(found.fold(false)(_.token === Some("token:new2")))
   }

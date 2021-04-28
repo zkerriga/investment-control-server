@@ -40,6 +40,9 @@ libraryDependencies ++= Seq(
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
   "org.slf4j" % "slf4j-simple" % "1.7.28",
 
+  // encryption
+  "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0",
+
   "org.scalatest" %% "scalatest" % "3.2.2" % Test,
   "org.scalamock" %% "scalamock" % "4.4.0" % Test,
   "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion % Test,

@@ -30,19 +30,25 @@ object ClientsQueryRepository {
   def addClient(login: String, passwordHash: String): DIO[Int, Effect.Write] =
     AllClients += Client(now.toEpochMilli, login, passwordHash, None)
 
-  private def queryByLogin(login: String): Query[ClientsTable, Client, Seq] =
-    AllClients.filter(_.login === login)
+  private def queryById(id: Long): Query[ClientsTable, Client, Seq] =
+    AllClients.filter(_.id === id)
 
-  def findByLogin(login: String): DIO[Option[Client], Effect.Read] =
-    queryByLogin(login)
+  def findById(id: Long): DIO[Option[Client], Effect.Read] =
+    queryById(id)
       .result
       .headOption
 
-  def inactiveClient(login: String): DIO[Int, Effect.Write] =
-    queryByLogin(login)
+  def findByLogin(login: String): DIO[Option[Client], Effect.Read] =
+    AllClients
+      .filter(_.login === login)
+      .result
+      .headOption
+
+  def inactiveClient(id: Long): DIO[Int, Effect.Write] =
+    queryById(id)
       .map(_.active).update(false)
 
-  def updateToken(login: String, token: String): DIO[Int, Effect.Write] =
-    queryByLogin(login)
+  def updateToken(id: Long, token: String): DIO[Int, Effect.Write] =
+    queryById(id)
       .map(_.token).update(Some(token))
 }

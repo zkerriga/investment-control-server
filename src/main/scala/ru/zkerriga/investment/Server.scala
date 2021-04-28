@@ -14,13 +14,15 @@ import sttp.tapir.swagger.akkahttp.SwaggerAkka
 import com.typesafe.scalalogging._
 import api.{ServiceApi, ServiceApiImpl}
 import routes.TapirRoutes
+import ru.zkerriga.investment.logic.{AsyncBcrypt, AsyncBcryptImpl}
 
 
 case class Server(interface: String, port: Int)(implicit as: ActorSystem, s: Scheduler) extends LazyLogging {
 
   val link = s"http://$interface:$port"
 
-  private val service: ServiceApi = new ServiceApiImpl
+  private val encryption: AsyncBcrypt = new AsyncBcryptImpl
+  private val service: ServiceApi = new ServiceApiImpl(encryption)
   private val endpoints = new TapirRoutes(service)
 
   private val routes: Route = AkkaHttpServerInterpreter.toRoute(endpoints.all)

@@ -22,4 +22,6 @@ object ServerDatabase {
   def registerClient(login: String, passwordHash: String): Task[Int] =
     run(ClientsQueryRepository.addClient(login, passwordHash))
 
+  def findClientByLogin(login: String): Task[Option[Client]] =
+    run(ClientsQueryRepository.findByLogin(login))
 }
