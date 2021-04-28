@@ -1,13 +1,14 @@
 package ru.zkerriga.investment.base
 
 import akka.actor.ActorSystem
+import akka.http.scaladsl.model.headers.BasicHttpCredentials
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, Uri}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AsyncFunSuite
 import scala.concurrent.Future
 
 import ru.zkerriga.investment.ServerConfiguration
-import ru.zkerriga.investment.entities.Login
+import ru.zkerriga.investment.entities.{Login, TinkoffToken}
 
 
 trait ServerISpecBase extends AsyncFunSuite with ServerConfiguration with BeforeAndAfterAll {
@@ -30,10 +31,27 @@ trait ServerISpecBase extends AsyncFunSuite with ServerConfiguration with Before
       .recover{ case _ => succeed }
   }
 
+  test("register and add token") {
+    for {
+      login1: String <- registerClient(sampleLogin1)
+      login2: String <- updateToken(sampleLogin1, TinkoffToken("123"))
+    } yield {
+      assert(login1 === sampleLogin1.login)
+      assert(login1 === login2)
+    }
+  }
+
   private def registerClient(login: Login): Future[String] =
     SimpleHttpClient.post[String](
       Uri(s"$link/register"),
       HttpEntity(ContentTypes.`application/json`, login.asJson.noSpaces)
+    )
+
+  private def updateToken(credentials: Login, token: TinkoffToken): Future[String] =
+    SimpleHttpClient.put[String](
+      Uri(s"$link/update/token"),
+      HttpEntity(ContentTypes.`application/json`, token.asJson.noSpaces),
+      BasicHttpCredentials(credentials.login, credentials.password)
     )
 
   private val sampleLogin1 =  Login("login1", "pass1")
