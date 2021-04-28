@@ -17,9 +17,7 @@ import routes.TapirRoutes
 import ru.zkerriga.investment.logic.{AsyncBcrypt, AsyncBcryptImpl}
 
 
-case class Server(interface: String, port: Int)(implicit as: ActorSystem, s: Scheduler) extends LazyLogging {
-
-  val link = s"http://$interface:$port"
+case class Server()(implicit as: ActorSystem, s: Scheduler) extends LazyLogging {
 
   private val encryption: AsyncBcrypt = new AsyncBcryptImpl
   private val service: ServiceApi = new ServiceApiImpl(encryption)
@@ -32,8 +30,8 @@ case class Server(interface: String, port: Int)(implicit as: ActorSystem, s: Sch
   )
   private val swagger = new SwaggerAkka(openapi.toYaml).routes
 
-
-  def start: Task[Http.ServerBinding] = Task.fromFuture {
+  def start(interface: String, port: Int): Task[Http.ServerBinding] = Task.fromFuture {
+    val link = s"http://$interface:$port"
     Http()
       .newServerAt(interface, port)
       .bind(routes ~ swagger)

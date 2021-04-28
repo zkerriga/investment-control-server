@@ -29,6 +29,6 @@ class ServerSpec extends ServerISpecBase {
   }
 
   private lazy val server: Future[Http.ServerBinding] =
-    Server(interface, port).start.runToFuture
+    Server().start(interface, port).runToFuture
 
 }
