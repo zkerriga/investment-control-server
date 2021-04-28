@@ -7,10 +7,10 @@ import monix.execution.Scheduler
 import scala.concurrent.Future
 import sttp.tapir.model.UsernamePassword
 import sttp.tapir.server.ServerEndpoint
-
 import ru.zkerriga.investment.entities.{Login, TinkoffToken}
 import ru.zkerriga.investment.api.{ExceptionResponse, ServiceApi}
 import ru.zkerriga.investment.storage.Client
+import sttp.tapir.EndpointInput.WWWAuthenticate
 
 
 class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends TapirSupport {
@@ -20,9 +20,10 @@ class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends TapirSu
   private val apiEndpoint =
     endpoint.in("api" / "v1" / "investment")
 
+  private val wwwAuth = WWWAuthenticate.basic("Enter the registration data")
   private val authEndpoint =
     apiEndpoint
-      .in(auth.basic[UsernamePassword]())
+      .in(auth.basic[UsernamePassword](wwwAuth))
       .errorOut(jsonBody[ExceptionResponse].description("If authentication failed"))
       .serverLogicForCurrent[Client, Future] { credentials =>
         handleErrors(serviceApi.verifyCredentials(credentials)).runToFuture
