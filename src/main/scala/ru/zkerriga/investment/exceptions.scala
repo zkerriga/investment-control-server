@@ -10,3 +10,6 @@ final case class LoginAlreadyExist(login: String)
 
 final case class IncorrectCredentials()
   extends ServiceException("Incorrect login or password")
+
+final case class InvalidToken()
+  extends ServiceException("Invalid token")
