@@ -8,7 +8,7 @@ import monix.eval.Task
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalamock.scalatest.MockFactory
-import ru.zkerriga.investment.{IncorrectCredentials, LoginAlreadyExist, ServerConfiguration}
+import ru.zkerriga.investment.{IncorrectCredentials, InvalidToken, LoginAlreadyExist, ServerConfiguration}
 import ru.zkerriga.investment.api.{ExceptionResponse, ServiceApi}
 import ru.zkerriga.investment.entities.{Login, TinkoffToken}
 import ru.zkerriga.investment.storage.Client
@@ -74,7 +74,7 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
     it("valid credentials") {
       val credentials = BasicHttpCredentials("login1", "pass1")
       val client = Client(1, "login1", "#*#", None)
-      val token = TinkoffToken("*#*")
+      val token = TinkoffToken("valid token")
       (mockServiceApi.verifyCredentials _)
         .expects(UsernamePassword(credentials.username, Some(credentials.password)))
         .returns(Task.now(client))
@@ -85,6 +85,22 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
       putToken(token) ~> addCredentials(credentials) ~> route ~> check {
         status shouldEqual StatusCodes.OK
         responseAs[String] shouldBe "login1"
+      }
+    }
+    it("valid credentials with invalid token") {
+      val credentials = BasicHttpCredentials("login1", "pass1")
+      val client = Client(1, "login1", "#*#", None)
+      val token = TinkoffToken("invalid token")
+      (mockServiceApi.verifyCredentials _)
+        .expects(UsernamePassword(credentials.username, Some(credentials.password)))
+        .returns(Task.now(client))
+      (mockServiceApi.updateToken _)
+        .expects(client, token)
+        .returns(Task.raiseError(InvalidToken()))
+
+      putToken(token) ~> addCredentials(credentials) ~> route ~> check {
+        status shouldEqual StatusCodes.BadRequest
+        responseAs[ExceptionResponse] shouldBe ExceptionResponse("Invalid token")
       }
     }
   }

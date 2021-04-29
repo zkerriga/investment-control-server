@@ -34,10 +34,10 @@ trait ServerISpecBase extends AsyncFunSuite with ServerConfiguration with Before
   test("register and add token") {
     for {
       login1 <- registerClient(sampleLogin3)
-      login2 <- updateToken(sampleLogin3, TinkoffToken("123"))
+      fail <- updateToken(sampleLogin3, TinkoffToken("invalid token")).recover(_ => "fail")
     } yield {
       assert(login1 === sampleLogin3.login)
-      assert(login1 === login2)
+      assert(fail === "fail")
     }
   }
 
