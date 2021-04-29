@@ -37,7 +37,7 @@ class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends TapirSu
       .out(jsonBody[String].description("Returns the login in case of successful registration"))
       .serverLogic {
         case (client: Client, token: TinkoffToken) =>
-          serviceApi.updateToken(client, token).map(Right.apply).runToFuture
+          handleErrors(serviceApi.updateToken(client, token)).runToFuture
       }
 
   val register: ServerEndpoint[Login, ExceptionResponse, String, Any, Future] =

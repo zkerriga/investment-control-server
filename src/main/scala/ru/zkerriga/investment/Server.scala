@@ -12,15 +12,17 @@ import sttp.tapir.openapi.circe.yaml._
 import sttp.tapir.server.akkahttp.AkkaHttpServerInterpreter
 import sttp.tapir.swagger.akkahttp.SwaggerAkka
 import com.typesafe.scalalogging._
-import api.{ServiceApi, ServiceApiImpl}
-import routes.TapirRoutes
-import ru.zkerriga.investment.logic.{AsyncBcrypt, AsyncBcryptImpl}
+
+import ru.zkerriga.investment.api.{ServiceApi, ServiceApiImpl}
+import ru.zkerriga.investment.routes.TapirRoutes
+import ru.zkerriga.investment.logic.{AsyncBcrypt, AsyncBcryptImpl, OpenApiClient, TinkoffOpenApiClient}
 
 
 case class Server()(implicit as: ActorSystem, s: Scheduler) extends LazyLogging {
 
+  private val tinkoffOpenApiClient: OpenApiClient = new TinkoffOpenApiClient
   private val encryption: AsyncBcrypt = new AsyncBcryptImpl
-  private val service: ServiceApi = new ServiceApiImpl(encryption)
+  private val service: ServiceApi = new ServiceApiImpl(encryption, tinkoffOpenApiClient)
   private val endpoints = new TapirRoutes(service)
 
   private val routes: Route = AkkaHttpServerInterpreter.toRoute(endpoints.all)

@@ -28,7 +28,8 @@ trait ServiceApi {
   /**
    * Updates the token of an existing token.
    * @param client must exist in the database!
-   * @return a login if the operation was successful
+   * @return a login if the operation was successful, and a InvalidToken exception
+   *         otherwise
    */
   def updateToken(client: Client, token: TinkoffToken): Task[String]
 }

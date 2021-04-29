@@ -3,13 +3,14 @@ package ru.zkerriga.investment.api
 import cats.data.OptionT
 import monix.eval.Task
 import sttp.tapir.model.UsernamePassword
-import ru.zkerriga.investment.{IncorrectCredentials, LoginAlreadyExist}
+
+import ru.zkerriga.investment.{IncorrectCredentials, InvalidToken, LoginAlreadyExist}
 import ru.zkerriga.investment.entities.{Login, TinkoffToken}
-import ru.zkerriga.investment.logic.AsyncBcrypt
+import ru.zkerriga.investment.logic.{AsyncBcrypt, OpenApiClient}
 import ru.zkerriga.investment.storage.{Client, ServerDatabase}
 
 
-class ServiceApiImpl(bcrypt: AsyncBcrypt) extends ServiceApi {
+class ServiceApiImpl(bcrypt: AsyncBcrypt, openApiClient: OpenApiClient) extends ServiceApi {
 
   def registerClient(login: Login): Task[String] =
     bcrypt.hash(login.password) flatMap { hash =>
@@ -28,8 +29,12 @@ class ServiceApiImpl(bcrypt: AsyncBcrypt) extends ServiceApi {
       .getOrElseF(Task.raiseError[Client](IncorrectCredentials()))
 
   def updateToken(client: Client, token: TinkoffToken): Task[String] = {
-    ServerDatabase.updateClientToken(client.id, token.token)
-      .map(_ => client.login)
+    openApiClient.`/sandbox/register`(token)
+      .redeemWith(
+        _ => Task.raiseError(InvalidToken()),
+        _ => ServerDatabase.updateClientToken(client.id, token.token)
+          .map(_ => client.login)
+      )
   }
 
 }
