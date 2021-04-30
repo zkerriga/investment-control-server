@@ -40,4 +40,12 @@ trait ServiceApi {
    *         otherwise
    */
   def updateToken(client: Client, token: TinkoffToken): Task[String]
+
+  /**
+   * @param page stock page based on the number of shares per page
+   * @param onPage number of shares per page
+   * @return a list of stocks that can be purchased on the exchange,
+   *         and a PageNotFound if there is nothing on the page
+   */
+  def getStocks(client: VerifiedClient, page: Int, onPage: Int): Task[Seq[Stock]]
 }

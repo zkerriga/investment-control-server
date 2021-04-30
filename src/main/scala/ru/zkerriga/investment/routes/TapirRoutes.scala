@@ -44,19 +44,19 @@ class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends TapirSu
         ).runToFuture
       }
 
-  val getStocks =
+  val getStocks: ServerEndpoint[(UsernamePassword, (Int, Int)), ExceptionResponse, Seq[Stock], Any, Future] =
     authWithTokenEndpoint.get
       .description("Get a list of shares on the stock exchange")
       .in("market" / "stocks")
       .in(
-        query[Long]("page").default(1).description("Page with stocks") and
-        query[Long]("onPage").default(20).description("So many stocks will be on one page")
+        query[Int]("page").default(1).description("Page with stocks") and
+        query[Int]("onPage").default(20).description("So many stocks will be on one page")
       )
-//      .out(jsonBody[List[Stock]])
-//      .serverLogic[Future] {
-//          case (client, (page, onPage)) => ???
-//        /* todo: вызвать просто у апи метод */
-//      }
+      .out(jsonBody[Seq[Stock]])
+      .serverLogic {
+          case (client, (page, onPage)) =>
+            handleErrors(serviceApi.getStocks(client, page, onPage)).runToFuture
+      }
 
   val updateToken: ServerEndpoint[(UsernamePassword, TinkoffToken), ExceptionResponse, String, Any, Future] =
     authEndpoint.put
