@@ -4,8 +4,9 @@ import cats.data.OptionT
 import monix.eval.Task
 import sttp.tapir.model.UsernamePassword
 
-import ru.zkerriga.investment.{IncorrectCredentials, InvalidToken, LoginAlreadyExist}
-import ru.zkerriga.investment.entities.{Login, TinkoffToken}
+import ru.zkerriga.investment.entities.openapi.Stock
+import ru.zkerriga.investment.{IncorrectCredentials, InvalidToken, LoginAlreadyExist, TokenDoesNotExist}
+import ru.zkerriga.investment.entities.{Login, TinkoffToken, VerifiedClient}
 import ru.zkerriga.investment.logic.{AsyncBcrypt, OpenApiClient}
 import ru.zkerriga.investment.storage.{Client, ServerDatabase}
 
@@ -27,6 +28,12 @@ class ServiceApiImpl(bcrypt: AsyncBcrypt, openApiClient: OpenApiClient) extends 
       if result
     } yield client)
       .getOrElseF(Task.raiseError[Client](IncorrectCredentials()))
+
+  def verifyToken(client: Client): Task[VerifiedClient] =
+    client.token
+      .fold(Task.raiseError[VerifiedClient](TokenDoesNotExist())){ token =>
+        Task.now(VerifiedClient.fromClient(client, TinkoffToken(token)))
+      }
 
   def updateToken(client: Client, token: TinkoffToken): Task[String] = {
     openApiClient.`/sandbox/register`(token)

@@ -2,7 +2,9 @@ package ru.zkerriga.investment.api
 
 import monix.eval.Task
 import sttp.tapir.model.UsernamePassword
-import ru.zkerriga.investment.entities.{Login, TinkoffToken}
+
+import ru.zkerriga.investment.entities.openapi.Stock
+import ru.zkerriga.investment.entities.{Login, TinkoffToken, VerifiedClient}
 import ru.zkerriga.investment.storage.Client
 
 
@@ -24,6 +26,12 @@ trait ServiceApi {
    *         and a IncorrectCredentials exception otherwise
    */
   def verifyCredentials(credentials: UsernamePassword): Task[Client]
+
+  /**
+   * Checks the client token.
+   * @return the client if the token exists, and a TokenDoesNotExist exception otherwise
+   */
+  def verifyToken(client: Client): Task[VerifiedClient]
 
   /**
    * Updates the token of an existing token.

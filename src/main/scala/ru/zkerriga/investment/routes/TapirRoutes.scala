@@ -3,14 +3,15 @@ package ru.zkerriga.investment.routes
 import sttp.tapir.generic.auto.schemaForCaseClass
 import sttp.tapir.json.circe.jsonBody
 import monix.execution.Scheduler
-
 import scala.concurrent.Future
 import sttp.tapir.model.UsernamePassword
 import sttp.tapir.server.ServerEndpoint
-import ru.zkerriga.investment.entities.{Login, TinkoffToken}
-import ru.zkerriga.investment.api.{ExceptionResponse, ServiceApi}
-import ru.zkerriga.investment.storage.Client
 import sttp.tapir.EndpointInput.WWWAuthenticate
+
+import ru.zkerriga.investment.entities.{Login, TinkoffToken, VerifiedClient}
+import ru.zkerriga.investment.api.{ExceptionResponse, ServiceApi}
+import ru.zkerriga.investment.entities.openapi.Stock
+import ru.zkerriga.investment.storage.Client
 
 
 class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends TapirSupport {
@@ -21,13 +22,41 @@ class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends TapirSu
     endpoint.in("api" / "v1" / "investment")
 
   private val wwwAuth = WWWAuthenticate.basic("Enter the registration data")
-  private val authEndpoint =
+  private val preAuthEndpoint =
     apiEndpoint
       .in(auth.basic[UsernamePassword](wwwAuth))
       .errorOut(jsonBody[ExceptionResponse].description("If authentication failed"))
+
+  private val authEndpoint =
+    preAuthEndpoint
       .serverLogicForCurrent[Client, Future] { credentials =>
         handleErrors(serviceApi.verifyCredentials(credentials)).runToFuture
       }
+
+  private val authWithTokenEndpoint =
+    preAuthEndpoint
+      .serverLogicForCurrent[VerifiedClient, Future] { credentials =>
+        handleErrors(
+          for {
+            client <- serviceApi.verifyCredentials(credentials)
+            verifiedClient <- serviceApi.verifyToken(client)
+          } yield verifiedClient
+        ).runToFuture
+      }
+
+  val getStocks =
+    authWithTokenEndpoint.get
+      .description("Get a list of shares on the stock exchange")
+      .in("market" / "stocks")
+      .in(
+        query[Long]("page").default(1).description("Page with stocks") and
+        query[Long]("onPage").default(20).description("So many stocks will be on one page")
+      )
+//      .out(jsonBody[List[Stock]])
+//      .serverLogic[Future] {
+//          case (client, (page, onPage)) => ???
+//        /* todo: вызвать просто у апи метод */
+//      }
 
   val updateToken: ServerEndpoint[(UsernamePassword, TinkoffToken), ExceptionResponse, String, Any, Future] =
     authEndpoint.put
@@ -51,5 +80,5 @@ class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends TapirSu
         handleErrors(serviceApi.registerClient(login)).runToFuture
       }
 
-  val all = List(register, updateToken)
+  val all = List(register, updateToken, getStocks)
 }
