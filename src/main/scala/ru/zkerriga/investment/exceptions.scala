@@ -13,3 +13,9 @@ final case class IncorrectCredentials()
 
 final case class InvalidToken()
   extends ServiceException("Invalid token")
+
+final case class TokenDoesNotExist()
+  extends ServiceException("A token is required to make the request")
+
+final case class PageNotFound()
+  extends ServiceException("Page not found")
