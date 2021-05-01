@@ -28,27 +28,32 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
   private def putToken(token: TinkoffToken): HttpRequest =
     Put(s"$api/update/token", HttpEntity(ContentTypes.`application/json`, token.asJson.noSpaces))
 
+  private val testUsername = "username"
+  private val testPassword = "pass"
+  private val testUsernamePassword = UsernamePassword(testUsername, Some(testPassword))
+  private val testLogin = Login(testUsername, testPassword)
+  private val testCredentials = BasicHttpCredentials(testUsername, testPassword)
+
   describe(s"POST $link/register") {
     it("register a new client") {
-      val login = Login("login1", "pass1")
       (mockServiceApi.registerClient _)
-        .expects(login)
-        .returns(Task.now(login.login))
+        .expects(testLogin)
+        .returns(Task.now(testUsername))
 
-      postLogin(login) ~> route ~> check {
+      postLogin(testLogin) ~> route ~> check {
         status shouldEqual StatusCodes.OK
-        responseAs[String] shouldBe login.login
+        responseAs[String] shouldBe testUsername
       }
     }
     it("register an existed client") {
-      val login = Login("login1", "pass1")
       (mockServiceApi.registerClient _)
-        .expects(login)
-        .returns(Task.raiseError(LoginAlreadyExist(login.login)))
+        .expects(testLogin)
+        .returns(Task.raiseError(LoginAlreadyExist(testUsername)))
 
-      postLogin(login) ~> route ~> check {
+      postLogin(testLogin) ~> route ~> check {
         status shouldEqual StatusCodes.BadRequest
-        responseAs[ExceptionResponse] shouldBe ExceptionResponse(s"Login `${login.login}` already exist")
+        responseAs[ExceptionResponse] shouldBe
+          ExceptionResponse(s"Login `$testUsername` already exist")
       }
     }
   }
@@ -57,48 +62,45 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
     it("must return Unauthorized") {
       Put(s"$api/update/token") ~> route ~> check {
         status shouldEqual StatusCodes.Unauthorized
-        header[`WWW-Authenticate`].get.challenges.head shouldEqual HttpChallenge("Basic", Some("Enter the registration data"))
+        header[`WWW-Authenticate`].get.challenges.head shouldEqual
+          HttpChallenge("Basic", Some("Enter the registration data"))
       }
     }
     it("invalid authentication") {
-      val credentials = BasicHttpCredentials("login1", "pass1")
       (mockServiceApi.verifyCredentials _)
-        .expects(UsernamePassword("login1", Some("pass1")))
+        .expects(testUsernamePassword)
         .returns(Task.raiseError[Client](IncorrectCredentials()))
 
-      putToken(TinkoffToken("_")) ~> addCredentials(credentials) ~> route ~> check {
+      putToken(TinkoffToken("_")) ~> addCredentials(testCredentials) ~> route ~> check {
         status shouldEqual StatusCodes.BadRequest
         responseAs[ExceptionResponse] shouldBe ExceptionResponse("Incorrect login or password")
       }
     }
+    val client = Client(1, testUsername, testPassword, None)
     it("valid credentials") {
-      val credentials = BasicHttpCredentials("login1", "pass1")
-      val client = Client(1, "login1", "#*#", None)
       val token = TinkoffToken("valid token")
       (mockServiceApi.verifyCredentials _)
-        .expects(UsernamePassword(credentials.username, Some(credentials.password)))
+        .expects(testUsernamePassword)
         .returns(Task.now(client))
       (mockServiceApi.updateToken _)
         .expects(client, token)
-        .returns(Task.now("login1"))
+        .returns(Task.now(testUsername))
 
-      putToken(token) ~> addCredentials(credentials) ~> route ~> check {
+      putToken(token) ~> addCredentials(testCredentials) ~> route ~> check {
         status shouldEqual StatusCodes.OK
-        responseAs[String] shouldBe "login1"
+        responseAs[String] shouldBe testUsername
       }
     }
     it("valid credentials with invalid token") {
-      val credentials = BasicHttpCredentials("login1", "pass1")
-      val client = Client(1, "login1", "#*#", None)
       val token = TinkoffToken("invalid token")
       (mockServiceApi.verifyCredentials _)
-        .expects(UsernamePassword(credentials.username, Some(credentials.password)))
+        .expects(testUsernamePassword)
         .returns(Task.now(client))
       (mockServiceApi.updateToken _)
         .expects(client, token)
         .returns(Task.raiseError(InvalidToken()))
 
-      putToken(token) ~> addCredentials(credentials) ~> route ~> check {
+      putToken(token) ~> addCredentials(testCredentials) ~> route ~> check {
         status shouldEqual StatusCodes.BadRequest
         responseAs[ExceptionResponse] shouldBe ExceptionResponse("Invalid token")
       }

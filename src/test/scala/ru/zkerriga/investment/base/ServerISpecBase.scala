@@ -20,23 +20,23 @@ trait ServerISpecBase extends AsyncFunSuite with ServerConfiguration with Before
 
   test("registrations") {
     val successful = for {
-      login1 <- registerClient(sampleLogin1)
-      login2 <- registerClient(sampleLogin2)
+      username1 <- registerClient(logins(1))
+      username2 <- registerClient(logins(2))
     } yield {
-      assert(login1 === sampleLogin1.login)
-      assert(login2 === sampleLogin2.login)
+      assert(username1 === logins(1).username)
+      assert(username2 === logins(2).username)
     }
-    successful.map{ _ => registerClient(sampleLogin1) }
+    successful.map{ _ => registerClient(logins(1)) }
       .map(_ => fail())
       .recover{ case _ => succeed }
   }
 
   test("register and add token") {
     for {
-      login1 <- registerClient(sampleLogin3)
-      fail <- updateToken(sampleLogin3, TinkoffToken("invalid token")).recover(_ => "fail")
+      username1 <- registerClient(logins(3))
+      fail <- updateToken(logins(3), TinkoffToken("invalid token")).recover(_ => "fail")
     } yield {
-      assert(login1 === sampleLogin3.login)
+      assert(username1 === logins(3).username)
       assert(fail === "fail")
     }
   }
@@ -51,11 +51,14 @@ trait ServerISpecBase extends AsyncFunSuite with ServerConfiguration with Before
     SimpleHttpClient.put[String](
       Uri(s"$link/update/token"),
       HttpEntity(ContentTypes.`application/json`, token.asJson.noSpaces),
-      BasicHttpCredentials(credentials.login, credentials.password)
+      BasicHttpCredentials(credentials.username, credentials.password)
     )
 
-  private val sampleLogin1 =  Login("login1", "pass1")
-  private val sampleLogin2 =  Login("login2", "pass2")
-  private val sampleLogin3 =  Login("login3", "pass3")
-
+  private val logins: LazyList[Login] = {
+    val pattern = "([a-z]+)(\\d+)".r
+    LazyList.iterate(Login("username1", "pass1")) {
+      case Login(pattern(name, n), pattern(pass, _)) =>
+        Login(s"$name${n + 1}", s"$pass${n + 1}")
+    }
+  }
 }

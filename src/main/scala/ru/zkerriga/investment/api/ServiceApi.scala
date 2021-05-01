@@ -15,7 +15,7 @@ import ru.zkerriga.investment.storage.Client
 trait ServiceApi {
   /**
    * Register a new client with a unique login.
-   * @return a login if the operation was successful,
+   * @return the username if the operation was successful,
    *         and a LoginAlreadyExist exception otherwise
    */
   def registerClient(login: Login): Task[String]
@@ -36,7 +36,7 @@ trait ServiceApi {
   /**
    * Updates the token of an existing token.
    * @param client must exist in the database!
-   * @return a login if the operation was successful, and a InvalidToken exception
+   * @return the username if the operation was successful, and a InvalidToken exception
    *         otherwise
    */
   def updateToken(client: Client, token: TinkoffToken): Task[String]

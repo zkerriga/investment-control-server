@@ -15,9 +15,9 @@ class ServiceApiImpl(bcrypt: AsyncBcrypt, openApiClient: OpenApiClient) extends 
 
   def registerClient(login: Login): Task[String] =
     bcrypt.hash(login.password) flatMap { hash =>
-      ServerDatabase.registerClient(login.login, hash)
-        .map(_ => login.login)
-        .onErrorFallbackTo(Task.raiseError(LoginAlreadyExist(login.login)))
+      ServerDatabase.registerClient(login.username, hash)
+        .map(_ => login.username)
+        .onErrorFallbackTo(Task.raiseError(LoginAlreadyExist(login.username)))
     }
 
   def verifyCredentials(credentials: UsernamePassword): Task[Client] =
