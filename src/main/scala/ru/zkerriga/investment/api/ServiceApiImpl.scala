@@ -4,7 +4,7 @@ import cats.data.OptionT
 import monix.eval.Task
 import sttp.tapir.model.UsernamePassword
 
-import ru.zkerriga.investment.entities.openapi.Stock
+import ru.zkerriga.investment.entities.openapi.Stocks
 import ru.zkerriga.investment.{IncorrectCredentials, InvalidToken, LoginAlreadyExist, PageNotFound, TokenDoesNotExist}
 import ru.zkerriga.investment.entities.{Login, TinkoffToken, VerifiedClient}
 import ru.zkerriga.investment.logic.{AsyncBcrypt, OpenApiClient}
@@ -44,13 +44,17 @@ class ServiceApiImpl(bcrypt: AsyncBcrypt, openApiClient: OpenApiClient) extends 
       )
   }
 
-  def getStocks(client: VerifiedClient, page: Int, onPage: Int): Task[Seq[Stock]] = {
+  def getStocks(client: VerifiedClient, page: Int, onPage: Int): Task[Stocks] =
     openApiClient.`/market/stocks`(client.token) flatMap { response =>
-      val result = response.payload.instruments
+      val resultStocks = response.payload.instruments
         .slice(onPage * (page - 1), onPage * page)
 
-      if (result.isEmpty) Task.raiseError(PageNotFound())
-      else Task.now(result)
+      if (resultStocks.isEmpty)
+        Task.raiseError(PageNotFound())
+      else
+        Task.now(response.payload.copy(
+          total = resultStocks.size,
+          instruments = resultStocks
+        ))
     }
-  }
 }

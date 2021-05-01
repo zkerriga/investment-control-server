@@ -3,7 +3,7 @@ package ru.zkerriga.investment.api
 import monix.eval.Task
 import sttp.tapir.model.UsernamePassword
 
-import ru.zkerriga.investment.entities.openapi.Stock
+import ru.zkerriga.investment.entities.openapi.{Stock, Stocks}
 import ru.zkerriga.investment.entities.{Login, TinkoffToken, VerifiedClient}
 import ru.zkerriga.investment.storage.Client
 
@@ -47,5 +47,5 @@ trait ServiceApi {
    * @return a list of stocks that can be purchased on the exchange,
    *         and a PageNotFound if there is nothing on the page
    */
-  def getStocks(client: VerifiedClient, page: Int, onPage: Int): Task[Seq[Stock]]
+  def getStocks(client: VerifiedClient, page: Int, onPage: Int): Task[Stocks]
 }

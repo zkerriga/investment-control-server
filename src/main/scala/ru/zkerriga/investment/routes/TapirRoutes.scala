@@ -10,7 +10,7 @@ import sttp.tapir.EndpointInput.WWWAuthenticate
 
 import ru.zkerriga.investment.entities.{Login, TinkoffToken, VerifiedClient}
 import ru.zkerriga.investment.api.{ExceptionResponse, ServiceApi}
-import ru.zkerriga.investment.entities.openapi.Stock
+import ru.zkerriga.investment.entities.openapi.{Stock, Stocks}
 import ru.zkerriga.investment.storage.Client
 
 
@@ -44,7 +44,7 @@ class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends TapirSu
         ).runToFuture
       }
 
-  val getStocks: ServerEndpoint[(UsernamePassword, (Int, Int)), ExceptionResponse, Seq[Stock], Any, Future] =
+  val getStocks: ServerEndpoint[(UsernamePassword, (Int, Int)), ExceptionResponse, Stocks, Any, Future] =
     authWithTokenEndpoint.get
       .description("Get a list of shares on the stock exchange")
       .in("market" / "stocks")
@@ -52,7 +52,7 @@ class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends TapirSu
         query[Int]("page").default(1).description("Page with stocks") and
         query[Int]("onPage").default(20).description("So many stocks will be on one page")
       )
-      .out(jsonBody[Seq[Stock]])
+      .out(jsonBody[Stocks])
       .serverLogic {
           case (client, (page, onPage)) =>
             handleErrors(serviceApi.getStocks(client, page, onPage)).runToFuture
