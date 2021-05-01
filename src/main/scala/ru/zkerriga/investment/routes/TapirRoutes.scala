@@ -1,5 +1,6 @@
 package ru.zkerriga.investment.routes
 
+import akka.http.scaladsl.server.Route
 import sttp.tapir.generic.auto.schemaForCaseClass
 import sttp.tapir.json.circe.jsonBody
 import monix.execution.Scheduler
@@ -7,14 +8,17 @@ import scala.concurrent.Future
 import sttp.tapir.model.UsernamePassword
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.EndpointInput.WWWAuthenticate
+import sttp.tapir.docs.openapi.OpenAPIDocsInterpreter
+import sttp.tapir.openapi.OpenAPI
+import sttp.tapir.server.akkahttp.AkkaHttpServerInterpreter
 
 import ru.zkerriga.investment.entities.{Login, TinkoffToken, VerifiedClient}
 import ru.zkerriga.investment.api.{ExceptionResponse, ServiceApi}
-import ru.zkerriga.investment.entities.openapi.{Stock, Stocks}
+import ru.zkerriga.investment.entities.openapi.Stocks
 import ru.zkerriga.investment.storage.Client
 
 
-class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends TapirSupport {
+class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends ServerRoutes with TapirSupport {
 
   import sttp.tapir._
 
@@ -80,5 +84,11 @@ class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends TapirSu
         handleErrors(serviceApi.registerClient(login)).runToFuture
       }
 
-  val all = List(register, updateToken, getStocks)
+  private val all = List(register, updateToken, getStocks)
+
+  override val openapi: OpenAPI = OpenAPIDocsInterpreter.serverEndpointsToOpenAPI(
+    all, "investment control server", "0.0.1"
+  )
+
+  override val routes: Route = AkkaHttpServerInterpreter.toRoute(all)
 }
