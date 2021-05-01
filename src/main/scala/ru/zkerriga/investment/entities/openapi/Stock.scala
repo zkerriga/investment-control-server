@@ -8,9 +8,9 @@ case class Stock(
   figi: String,
   ticker: String,
   isin: String,
-  minPriceIncrement: Double,
+  minPriceIncrement: Option[Double],
   lot: Int,
-  minQuantity: Int,
+  minQuantity: Option[Int],
   currency: String,
   name: String
 )
