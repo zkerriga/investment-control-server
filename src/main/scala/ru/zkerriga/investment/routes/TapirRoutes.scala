@@ -21,6 +21,7 @@ import ru.zkerriga.investment.storage.Client
 class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends ServerRoutes with TapirSupport {
 
   import sttp.tapir._
+  import sttp.tapir.openapi._
 
   private val apiEndpoint =
     endpoint.in("api" / "v1" / "investment")
@@ -50,7 +51,9 @@ class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends ServerR
 
   val getStocks: ServerEndpoint[(UsernamePassword, (Int, Int)), ExceptionResponse, Stocks, Any, Future] =
     authWithTokenEndpoint.get
-      .description("Get a list of shares on the stock exchange")
+      .tag("market")
+      .summary("Get a list of stocks")
+      .description("The request goes to Tinkoff-OpenAPI and gets a part of the list of available stocks")
       .in("market" / "stocks")
       .in(
         query[Int]("page").default(1).description("Page with stocks") and
@@ -64,10 +67,12 @@ class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends ServerR
 
   val updateToken: ServerEndpoint[(UsernamePassword, TinkoffToken), ExceptionResponse, String, Any, Future] =
     authEndpoint.put
-      .description("Token Update for Tinkoff Investments")
+      .tag("registration")
+      .summary("Updates the token")
+      .description("Checks the validity of the token from Tinkoff-OpenAPI and enters it in the client data")
       .in("update" / "token")
       .in(jsonBody[TinkoffToken])
-      .out(jsonBody[String].description("Returns the login in case of successful registration"))
+      .out(jsonBody[String].description("Returns the username in case of successful registration"))
       .serverLogic {
         case (client: Client, token: TinkoffToken) =>
           handleErrors(serviceApi.updateToken(client, token)).runToFuture
@@ -75,10 +80,12 @@ class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends ServerR
 
   val register: ServerEndpoint[Login, ExceptionResponse, String, Any, Future] =
     apiEndpoint.post
-      .description("Registering a new client")
+      .tag("registration")
+      .summary("Registers a client")
+      .description("Checks if the username is free and registers a new client")
       .in("register")
       .in(jsonBody[Login])
-      .out(jsonBody[String].description("Returns the login in case of successful registration"))
+      .out(jsonBody[String].description("Returns the username in case of successful registration"))
       .errorOut(jsonBody[ExceptionResponse].description("The login may be busy"))
       .serverLogic[Future] { login =>
         handleErrors(serviceApi.registerClient(login)).runToFuture
@@ -87,7 +94,17 @@ class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends ServerR
   private val all = List(register, updateToken, getStocks)
 
   override val openapi: OpenAPI = OpenAPIDocsInterpreter.serverEndpointsToOpenAPI(
-    all, "investment control server", "0.0.1"
+    all,
+    Info(
+      title = "The Investment Control Server",
+      version = "0.0.1",
+      description = Some("Server for working with StopLoss and TakeProfit strategies via Tinkoff OpenAPI"),
+      contact = Some(Contact(
+        name = Some("Daniil Eletskii"),
+        email = None,
+        url = Some("https://github.com/zkerriga")
+      ))
+    )
   )
 
   override val routes: Route = AkkaHttpServerInterpreter.toRoute(all)
