@@ -1,4 +1,4 @@
-package ru.zkerriga.investment
+package ru.zkerriga.investment.base
 
 trait ServerConfiguration {
   val interface: String = "localhost"

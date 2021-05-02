@@ -9,7 +9,6 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AsyncFunSuite
 import scala.concurrent.Future
 
-import ru.zkerriga.investment.ServerConfiguration
 import ru.zkerriga.investment.entities.openapi.Stocks
 import ru.zkerriga.investment.entities.{Login, TinkoffToken}
 
@@ -88,7 +87,7 @@ trait ServerISpecBase extends AsyncFunSuite with ServerConfiguration with Before
     val pattern = "([a-z]+)(\\d+)".r
     LazyList.iterate(Login("username1", "pass1")) {
       case Login(pattern(name, n), pattern(pass, _)) =>
-        Login(s"$name${n + 1}", s"$pass${n + 1}")
+        Login(s"$name${n.toInt + 1}", s"$pass${n.toInt + 1}")
     }
   }
 }

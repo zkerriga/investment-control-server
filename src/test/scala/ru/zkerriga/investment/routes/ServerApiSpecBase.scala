@@ -9,9 +9,9 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalamock.scalatest.MockFactory
 import sttp.tapir.model.UsernamePassword
-
-import ru.zkerriga.investment.{IncorrectCredentials, InvalidToken, LoginAlreadyExist, PageNotFound, ServerConfiguration}
+import ru.zkerriga.investment.{IncorrectCredentials, InvalidToken, LoginAlreadyExist, PageNotFound}
 import ru.zkerriga.investment.api.ExceptionResponse
+import ru.zkerriga.investment.base.ServerConfiguration
 import ru.zkerriga.investment.entities.openapi.{Stock, Stocks}
 import ru.zkerriga.investment.entities.{Login, TinkoffToken, VerifiedClient}
 import ru.zkerriga.investment.logic.ServiceLogic
