@@ -1,4 +1,4 @@
-package ru.zkerriga.investment.newroutes
+package ru.zkerriga.investment.api
 
 import monix.eval.Task
 import monix.execution.Scheduler
@@ -6,13 +6,14 @@ import sttp.tapir.model.UsernamePassword
 import sttp.tapir.server.ServerEndpoint
 import scala.concurrent.Future
 
-import ru.zkerriga.investment.api.{ExceptionResponse, ServiceApi}
 import ru.zkerriga.investment.entities.VerifiedClient
 import ru.zkerriga.investment.entities.openapi.Stocks
-import ru.zkerriga.investment.newroutes.documentation.MarketEndpoint
+import ru.zkerriga.investment.logic.ServiceLogic
+import ru.zkerriga.investment.api.documentation.MarketEndpoint
 
 
-class MarketServerEndpoint(serviceApi: ServiceApi, exceptionHandler: ExceptionHandler[Task])(implicit s: Scheduler) extends Endpoints[Future] {
+class MarketServerEndpoint(serviceApi: ServiceLogic, exceptionHandler: ExceptionHandler[Task])(implicit s: Scheduler)
+  extends Endpoints[Future] {
 
   private def authorize(credentials: UsernamePassword): Future[Either[ExceptionResponse, VerifiedClient]] =
     exceptionHandler.handle(

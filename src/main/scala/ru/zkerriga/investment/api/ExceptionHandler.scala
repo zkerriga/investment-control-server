@@ -1,8 +1,6 @@
-package ru.zkerriga.investment.newroutes
+package ru.zkerriga.investment.api
 
 import monix.eval.Task
-
-import ru.zkerriga.investment.api.ExceptionResponse
 
 
 trait ExceptionHandler[F[_]] {
@@ -10,7 +8,7 @@ trait ExceptionHandler[F[_]] {
 }
 
 object ExceptionHandlerForTask {
-  def apply: ExceptionHandler[Task] = new ExceptionHandler[Task] {
+  def apply(): ExceptionHandler[Task] = new ExceptionHandler[Task] {
     override def handle[A](task: Task[A]): Task[Either[ExceptionResponse, A]] =
       task.redeem(
         error => Left(ExceptionResponse(error.getMessage)),

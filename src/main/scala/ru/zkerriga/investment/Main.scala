@@ -2,12 +2,11 @@ package ru.zkerriga.investment
 
 import akka.actor.ActorSystem
 import monix.eval.Task
-import logging.Console
 import monix.execution.Scheduler
 
-import ru.zkerriga.investment.api.{ServiceApi, ServiceApiImpl}
-import ru.zkerriga.investment.logic.{AsyncBcrypt, AsyncBcryptImpl, OpenApiClient, TinkoffOpenApiClient}
-import ru.zkerriga.investment.routes.TapirRoutes
+import ru.zkerriga.investment.logging.Console
+import ru.zkerriga.investment.logic._
+import ru.zkerriga.investment.api._
 
 
 object Main {
@@ -16,12 +15,26 @@ object Main {
 
   private def terminateSystem = Task.fromFuture(as.terminate())
 
-  def main(args: Array[String]): Unit = {
+  def createServiceApi: ServiceLogic = {
     val tinkoffOpenApiClient: OpenApiClient = new TinkoffOpenApiClient
     val encryption: AsyncBcrypt = new AsyncBcryptImpl
-    val service: ServiceApi = new ServiceApiImpl(encryption, tinkoffOpenApiClient)
-    val endpoints = new TapirRoutes(service)
-    val server = Server(endpoints)
+    new ServiceLogicImpl(encryption, tinkoffOpenApiClient)
+  }
+
+  def createServerRoutes(service: ServiceLogic): ServerRoutes = {
+    val exceptionHandler: ExceptionHandler[Task] = ExceptionHandlerForTask()
+    new ServerRoutesImpl(
+      List(
+        new MarketServerEndpoint(service, exceptionHandler),
+        new RegisterServerEndpoint(service, exceptionHandler)
+      )
+    )
+  }
+
+  def main(args: Array[String]): Unit = {
+    val service: ServiceLogic       = createServiceApi
+    val serverRoutes: ServerRoutes  = createServerRoutes(service)
+    val server                      = Server(serverRoutes)
 
     val program = for {
       http <- server.start("localhost", 8080)

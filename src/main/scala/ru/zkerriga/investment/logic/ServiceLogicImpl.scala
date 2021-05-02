@@ -1,17 +1,16 @@
-package ru.zkerriga.investment.api
+package ru.zkerriga.investment.logic
 
 import cats.data.OptionT
 import monix.eval.Task
 import sttp.tapir.model.UsernamePassword
 
 import ru.zkerriga.investment.entities.openapi.Stocks
-import ru.zkerriga.investment.{IncorrectCredentials, InvalidToken, LoginAlreadyExist, PageNotFound, TokenDoesNotExist}
 import ru.zkerriga.investment.entities.{Login, TinkoffToken, VerifiedClient}
-import ru.zkerriga.investment.logic.{AsyncBcrypt, OpenApiClient}
 import ru.zkerriga.investment.storage.{Client, ServerDatabase}
+import ru.zkerriga.investment._
 
 
-class ServiceApiImpl(bcrypt: AsyncBcrypt, openApiClient: OpenApiClient) extends ServiceApi {
+class ServiceLogicImpl(bcrypt: AsyncBcrypt, openApiClient: OpenApiClient) extends ServiceLogic {
 
   def registerClient(login: Login): Task[String] =
     bcrypt.hash(login.password) flatMap { hash =>

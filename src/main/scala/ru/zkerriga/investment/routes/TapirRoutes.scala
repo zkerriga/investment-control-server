@@ -4,21 +4,22 @@ import akka.http.scaladsl.server.Route
 import sttp.tapir.generic.auto.schemaForCaseClass
 import sttp.tapir.json.circe.jsonBody
 import monix.execution.Scheduler
+
 import scala.concurrent.Future
 import sttp.tapir.model.UsernamePassword
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.EndpointInput.WWWAuthenticate
 import sttp.tapir.docs.openapi.OpenAPIDocsInterpreter
-import sttp.tapir.openapi.OpenAPI
 import sttp.tapir.server.akkahttp.AkkaHttpServerInterpreter
 
 import ru.zkerriga.investment.entities.{Login, TinkoffToken, VerifiedClient}
-import ru.zkerriga.investment.api.{ExceptionResponse, ServiceApi}
+import ru.zkerriga.investment.api.ExceptionResponse
 import ru.zkerriga.investment.entities.openapi.Stocks
+import ru.zkerriga.investment.logic.ServiceLogic
 import ru.zkerriga.investment.storage.Client
 
 
-class TapirRoutes(serviceApi: ServiceApi)(implicit s: Scheduler) extends ServerRoutes with TapirSupport {
+class TapirRoutes(serviceApi: ServiceLogic)(implicit s: Scheduler) extends ServerRoutes with TapirSupport {
 
   import sttp.tapir._
   import sttp.tapir.openapi._

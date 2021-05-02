@@ -1,4 +1,4 @@
-package ru.zkerriga.investment.newroutes
+package ru.zkerriga.investment.api
 
 import monix.eval.Task
 import monix.execution.Scheduler
@@ -6,13 +6,14 @@ import sttp.tapir.model.UsernamePassword
 import sttp.tapir.server.ServerEndpoint
 import scala.concurrent.Future
 
-import ru.zkerriga.investment.api.{ExceptionResponse, ServiceApi}
 import ru.zkerriga.investment.entities.TinkoffToken
-import ru.zkerriga.investment.newroutes.documentation.RegisterEndpoint
+import ru.zkerriga.investment.logic.ServiceLogic
+import ru.zkerriga.investment.api.documentation.RegisterEndpoint
 import ru.zkerriga.investment.storage.Client
 
 
-class RegisterServerEndpoint(serviceApi: ServiceApi, exceptionHandler: ExceptionHandler[Task])(implicit s: Scheduler) extends Endpoints[Future] {
+class RegisterServerEndpoint(serviceApi: ServiceLogic, exceptionHandler: ExceptionHandler[Task])(implicit s: Scheduler)
+  extends Endpoints[Future] {
 
   private def authorizeWithoutToken(credentials: UsernamePassword): Future[Either[ExceptionResponse, Client]] =
     exceptionHandler.handle(serviceApi.verifyCredentials(credentials)).runToFuture

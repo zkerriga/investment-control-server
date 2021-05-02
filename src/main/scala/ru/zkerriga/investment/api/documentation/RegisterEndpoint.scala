@@ -1,4 +1,4 @@
-package ru.zkerriga.investment.newroutes.documentation
+package ru.zkerriga.investment.api.documentation
 
 import sttp.tapir.json.circe.jsonBody
 import sttp.tapir.generic.auto.schemaForCaseClass
@@ -18,7 +18,7 @@ trait RegisterEndpoint {
       .tag("registration")
 
   private[api] lazy val register: Endpoint[Login, ExceptionResponse, String, Any] =
-    baseApiRegistration
+    baseApiRegistration.post
       .summary("Registers a client")
       .description("Checks if the username is free and registers a new client")
       .in("register")
@@ -27,7 +27,7 @@ trait RegisterEndpoint {
       .errorOut(jsonBody[ExceptionResponse].description("The login may be busy"))
 
   private[api] lazy val updateToken: Endpoint[(UsernamePassword, TinkoffToken), ExceptionResponse, String, Any] =
-    baseApiRegistration.withAuth
+    baseApiRegistration.put.withAuth
       .summary("Updates the token")
       .description("Checks the validity of the token from Tinkoff-OpenAPI and enters it in the client data")
       .in("update" / "token")

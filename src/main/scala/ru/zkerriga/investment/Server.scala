@@ -6,24 +6,20 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 import monix.eval.Task
 import monix.execution.Scheduler
-import sttp.tapir.openapi.circe.yaml._
-import sttp.tapir.swagger.akkahttp.SwaggerAkka
-import com.typesafe.scalalogging._
-import akka.http.scaladsl.server.RouteConcatenation._
+import com.typesafe.scalalogging.LazyLogging
 
-import ru.zkerriga.investment.routes.ServerRoutes
+import ru.zkerriga.investment.api.ServerRoutes
 
 
 case class Server(serverRoutes: ServerRoutes)(implicit as: ActorSystem, s: Scheduler) extends LazyLogging {
 
-  private val routes: Route = serverRoutes.routes
-  private val swagger = new SwaggerAkka(serverRoutes.openapi.toYaml).routes
+  private lazy val routes: Route = serverRoutes.routes
 
   def start(interface: String, port: Int): Task[Http.ServerBinding] = Task.fromFuture {
     val link = s"http://$interface:$port"
     Http()
       .newServerAt(interface, port)
-      .bind(routes ~ swagger)
+      .bind(routes)
       .andThen{ case _ =>
         logger.info(
           s"""Server started at: $link

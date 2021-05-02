@@ -1,4 +1,4 @@
-package ru.zkerriga.investment.newroutes.documentation
+package ru.zkerriga.investment.api.documentation
 
 import sttp.tapir.json.circe.jsonBody
 import sttp.tapir.generic.auto.schemaForCaseClass

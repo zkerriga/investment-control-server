@@ -1,4 +1,4 @@
-package ru.zkerriga.investment.newroutes
+package ru.zkerriga.investment.api
 
 import sttp.tapir.server.ServerEndpoint
 

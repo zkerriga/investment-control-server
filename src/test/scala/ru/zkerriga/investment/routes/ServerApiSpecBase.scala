@@ -9,13 +9,11 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalamock.scalatest.MockFactory
 import sttp.tapir.model.UsernamePassword
-
-import ru.zkerriga.investment.{
-  IncorrectCredentials, InvalidToken, LoginAlreadyExist, PageNotFound, ServerConfiguration
-}
-import ru.zkerriga.investment.api.{ExceptionResponse, ServiceApi}
+import ru.zkerriga.investment.{IncorrectCredentials, InvalidToken, LoginAlreadyExist, PageNotFound, ServerConfiguration}
+import ru.zkerriga.investment.api.{ExceptionResponse, ServiceLogic}
 import ru.zkerriga.investment.entities.openapi.{Stock, Stocks}
 import ru.zkerriga.investment.entities.{Login, TinkoffToken, VerifiedClient}
+import ru.zkerriga.investment.logic.ServiceLogic
 import ru.zkerriga.investment.storage.Client
 
 
@@ -153,5 +151,5 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
     }
   }
 
-  protected val mockServiceApi: ServiceApi = mock[ServiceApi]
+  protected val mockServiceApi: ServiceLogic = mock[ServiceLogic]
 }

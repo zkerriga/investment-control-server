@@ -4,12 +4,12 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import monix.execution.Scheduler
 import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
+
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
-
-import ru.zkerriga.investment.api.{ServiceApi, ServiceApiImpl}
+import ru.zkerriga.investment.api.ServiceLogicImpl
 import ru.zkerriga.investment.base.ServerISpecBase
-import ru.zkerriga.investment.logic.{AsyncBcrypt, AsyncBcryptImpl, OpenApiClient, TinkoffOpenApiClient}
+import ru.zkerriga.investment.logic.{AsyncBcrypt, AsyncBcryptImpl, OpenApiClient, ServiceLogic, ServiceLogicImpl, TinkoffOpenApiClient}
 import ru.zkerriga.investment.routes.TapirRoutes
 
 
@@ -20,7 +20,7 @@ class ServerSpec extends ServerISpecBase {
 
   val tinkoffOpenApiClient: OpenApiClient = new TinkoffOpenApiClient
   val encryption: AsyncBcrypt = new AsyncBcryptImpl
-  val service: ServiceApi = new ServiceApiImpl(encryption, tinkoffOpenApiClient)
+  val service: ServiceLogic = new ServiceLogicImpl(encryption, tinkoffOpenApiClient)
   val endpoints = new TapirRoutes(service)
 
   override protected def beforeAll(): Unit = {
@@ -38,6 +38,7 @@ class ServerSpec extends ServerISpecBase {
   }
 
   private lazy val server: Future[Http.ServerBinding] =
-    Server(endpoints).start(interface, port).runToFuture
+    Server(Main.createServerRoutes(Main.createServiceApi))
+      .start(interface, port).runToFuture
 
 }

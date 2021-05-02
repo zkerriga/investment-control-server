@@ -1,4 +1,4 @@
-package ru.zkerriga.investment.newroutes.documentation
+package ru.zkerriga.investment.api.documentation
 
 import sttp.tapir.{Endpoint, EndpointInput, _}
 
@@ -13,8 +13,6 @@ trait ApiEndpoint {
   private[api] lazy val baseEndpoint: Endpoint[Unit, Unit, Unit, Any] =
     endpoint
       .in(baseApiEndpointInput)
-      .name("name test")
-      .description("description test")
 }
 
 object ApiEndpoint extends ApiEndpoint
