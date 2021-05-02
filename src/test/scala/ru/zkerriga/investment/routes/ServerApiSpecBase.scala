@@ -1,7 +1,7 @@
 package ru.zkerriga.investment.routes
 
 import akka.http.scaladsl.model.headers.{BasicHttpCredentials, HttpChallenge, `WWW-Authenticate`}
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpHeader, HttpRequest, StatusCodes}
+import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import monix.eval.Task
@@ -9,8 +9,9 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalamock.scalatest.MockFactory
 import sttp.tapir.model.UsernamePassword
+
 import ru.zkerriga.investment.{IncorrectCredentials, InvalidToken, LoginAlreadyExist, PageNotFound, ServerConfiguration}
-import ru.zkerriga.investment.api.{ExceptionResponse, ServiceLogic}
+import ru.zkerriga.investment.api.ExceptionResponse
 import ru.zkerriga.investment.entities.openapi.{Stock, Stocks}
 import ru.zkerriga.investment.entities.{Login, TinkoffToken, VerifiedClient}
 import ru.zkerriga.investment.logic.ServiceLogic
