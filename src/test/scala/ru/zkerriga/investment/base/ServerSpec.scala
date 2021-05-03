@@ -7,6 +7,8 @@ import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
+
+import ru.zkerriga.investment.storage.ServerDatabase
 import ru.zkerriga.investment.logic.{AsyncBcryptImpl, ServiceLogicImpl, TinkoffOpenApiClient}
 import ru.zkerriga.investment.{Main, Server}
 
@@ -33,7 +35,7 @@ class ServerSpec extends ServerISpecBase {
   private val server: Future[Http.ServerBinding] =
     Server(
       Main.createServerRoutes(
-        new ServiceLogicImpl(new AsyncBcryptImpl, new TinkoffOpenApiClient)
+        new ServiceLogicImpl(new AsyncBcryptImpl, new TinkoffOpenApiClient, ServerDatabase)
       )
     ).start(interface, port).runToFuture
 

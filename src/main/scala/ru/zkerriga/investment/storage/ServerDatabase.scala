@@ -6,7 +6,7 @@ import monix.eval.Task
 import ru.zkerriga.investment.storage.entities.Client
 
 
-object ServerDatabase {
+object ServerDatabase extends Dao {
   private val clients = ClientsQueryRepository.AllClients
   private val trackStocks = TrackStocksQueryRepository.AllTrackStocks
   private val notifications = NotificationsQueryRepository.AllNotifications
@@ -24,11 +24,11 @@ object ServerDatabase {
 
   def close(): Task[Unit] = Task(db.close())
 
-  def registerClient(login: String, passwordHash: String): Task[Long] =
-    run(ClientsQueryRepository.addClient(login, passwordHash))
+  def registerClient(username: String, passwordHash: String): Task[Long] =
+    run(ClientsQueryRepository.addClient(username, passwordHash))
 
-  def findClientByLogin(login: String): Task[Option[Client]] =
-    run(ClientsQueryRepository.findByLogin(login))
+  def findClientByUsername(username: String): Task[Option[Client]] =
+    run(ClientsQueryRepository.findByLogin(username))
 
   def updateClientToken(clientId: Long, token: String): Task[Int] =
     run(ClientsQueryRepository.updateToken(clientId, token))

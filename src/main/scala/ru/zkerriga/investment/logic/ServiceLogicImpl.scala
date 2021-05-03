@@ -6,16 +6,16 @@ import sttp.tapir.model.UsernamePassword
 
 import ru.zkerriga.investment.entities.openapi.Stocks
 import ru.zkerriga.investment.entities.{Login, TinkoffToken, VerifiedClient}
-import ru.zkerriga.investment.storage.ServerDatabase
+import ru.zkerriga.investment.storage.Dao
 import ru.zkerriga.investment.storage.entities.Client
 import ru.zkerriga.investment._
 
 
-class ServiceLogicImpl(bcrypt: AsyncBcrypt, openApiClient: OpenApiClient) extends ServiceLogic {
+class ServiceLogicImpl(bcrypt: AsyncBcrypt, openApiClient: OpenApiClient, dao: Dao) extends ServiceLogic {
 
   def registerClient(login: Login): Task[String] =
     bcrypt.hash(login.password) flatMap { hash =>
-      ServerDatabase.registerClient(login.username, hash)
+      dao.registerClient(login.username, hash)
         .map(_ => login.username)
         .onErrorFallbackTo(Task.raiseError(LoginAlreadyExist(login.username)))
     }
@@ -23,7 +23,7 @@ class ServiceLogicImpl(bcrypt: AsyncBcrypt, openApiClient: OpenApiClient) extend
   def verifyCredentials(credentials: UsernamePassword): Task[Client] =
     (for {
       pass   <- OptionT.fromOption[Task](credentials.password)
-      client <- OptionT(ServerDatabase.findClientByLogin(credentials.username))
+      client <- OptionT(dao.findClientByUsername(credentials.username))
       result <- OptionT.liftF(bcrypt.verify(pass, client.passwordHash))
       if result
     } yield client)
@@ -42,7 +42,7 @@ class ServiceLogicImpl(bcrypt: AsyncBcrypt, openApiClient: OpenApiClient) extend
       openApiClient.`/sandbox/register`(token)
         .redeemWith(
           _ => errorTask,
-          _ => ServerDatabase.updateClientToken(id, token.token)
+          _ => dao.updateClientToken(id, token.token)
             .map(_ => client.login)
         )
     }
