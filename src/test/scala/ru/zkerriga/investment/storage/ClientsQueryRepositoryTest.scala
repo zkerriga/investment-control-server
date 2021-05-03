@@ -6,7 +6,7 @@ import ClientsQueryRepository._
 
 class ClientsQueryRepositoryTest extends ClientsDatabaseSuite with Matchers {
 
-  test("add new client should return 1") {
+  test("add new client should id") {
     for {
       res <- addClient("login3", "hash:something3")
     } yield assert(res >= 0L)

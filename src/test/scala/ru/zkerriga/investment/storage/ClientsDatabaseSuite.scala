@@ -5,6 +5,7 @@ import org.scalatest.compatible
 import org.scalatest.funsuite.AsyncFunSuite
 
 import ClientsQueryRepository.AllClients
+import TrackStocksQueryRepository.AllTrackStocks
 
 import slick.dbio.{DBIOAction, Effect, NoStream}
 import slick.jdbc.JdbcBackend.Database
@@ -24,16 +25,24 @@ abstract class ClientsDatabaseSuite extends AsyncFunSuite {
 
       db.run(
         initSchema
-          .andThen(AllClients ++= sampleClients)
+          .andThen(AllClients.forceInsertAll(sampleClients))
+          .andThen(AllTrackStocks.forceInsertAll(sampleTrackStocks))
       ).flatMap(_ => db.run(testFun)).andThen { case _ => db.close() }
     }
   }
 
   private val initSchema =
-    (ClientsQueryRepository.AllClients.schema).create /* todo: use flyway to create db */
+    (ClientsQueryRepository.AllClients.schema ++
+      TrackStocksQueryRepository.AllTrackStocks.schema).create /* todo: use flyway to create db */
 
   protected val sampleClients = Seq(
-    Client(None, "login1", "hash:something1", None),
-    Client(None, "login2", "hash:something2", Some("token:something2")),
+    Client(Some(1), "login1", "hash:something1", None),
+    Client(Some(2), "login2", "hash:something2", Some("token:something2")),
+  )
+
+  protected val sampleTrackStocks = Seq(
+    TrackStock(Some(1), clientId = 1, "FIGI1", 10.0, 40.0),
+    TrackStock(Some(2), clientId = 1, "FIGI2", 100.0, 110.0),
+    TrackStock(Some(3), clientId = 2, "FIGI3", 10.0, 40.0)
   )
 }
