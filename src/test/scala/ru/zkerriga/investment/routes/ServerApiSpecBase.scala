@@ -12,7 +12,7 @@ import sttp.tapir.model.UsernamePassword
 import ru.zkerriga.investment.{IncorrectCredentials, InvalidToken, LoginAlreadyExist, PageNotFound}
 import ru.zkerriga.investment.api.ExceptionResponse
 import ru.zkerriga.investment.base.ServerConfiguration
-import ru.zkerriga.investment.entities.openapi.{Stock, Stocks}
+import ru.zkerriga.investment.entities.openapi._
 import ru.zkerriga.investment.entities.{Login, TinkoffToken, VerifiedClient}
 import ru.zkerriga.investment.logic.ServiceLogic
 import ru.zkerriga.investment.storage.Client
@@ -22,6 +22,7 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
 
   import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
   import io.circe.syntax._
+  import io.circe.generic.auto._
 
   def route: Route
 

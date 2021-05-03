@@ -17,6 +17,7 @@ trait ServerISpecBase extends AsyncFunSuite with ServerConfiguration with Before
 
   import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
   import io.circe.syntax._
+  import io.circe.generic.auto._
 
   implicit def as: ActorSystem
 

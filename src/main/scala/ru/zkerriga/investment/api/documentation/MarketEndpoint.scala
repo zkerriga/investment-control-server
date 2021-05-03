@@ -11,6 +11,7 @@ import ru.zkerriga.investment.api.ExceptionResponse
 trait MarketEndpoint {
 
   import sttp.tapir._
+  import io.circe.generic.auto._
   import Authentication._
 
   private lazy val baseApiMarket =
