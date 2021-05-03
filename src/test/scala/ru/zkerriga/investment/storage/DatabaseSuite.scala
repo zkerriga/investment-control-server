@@ -12,6 +12,8 @@ import slick.dbio.{DBIOAction, Effect, NoStream}
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.H2Profile.api._
 
+import ru.zkerriga.investment.storage.entities._
+
 
 abstract class DatabaseSuite extends AsyncFunSuite {
   protected def test[R, S <: NoStream, E <: Effect](testName: String)

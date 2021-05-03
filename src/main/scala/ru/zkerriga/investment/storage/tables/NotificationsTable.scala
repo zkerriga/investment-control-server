@@ -1,16 +1,11 @@
-package ru.zkerriga.investment.storage
+package ru.zkerriga.investment.storage.tables
 
-import slick.dbio.Effect
 import slick.jdbc.H2Profile.api._
 import slick.lifted.{ForeignKeyQuery, ProvenShape}
 
+import ru.zkerriga.investment.storage.ClientsQueryRepository
+import ru.zkerriga.investment.storage.entities.{Client, Notification}
 
-case class Notification(
-  id: Option[Long],
-  clientId: Long,
-  message: String,
-  sent: Boolean = false
-)
 
 class NotificationsTable(tag: Tag) extends Table[Notification](tag, "NOTIFICATIONS") {
   def id: Rep[Long] = column("ID", O.PrimaryKey, O.AutoInc)
@@ -23,13 +18,4 @@ class NotificationsTable(tag: Tag) extends Table[Notification](tag, "NOTIFICATIO
     foreignKey("CLIENT_FOR_NOTIFICATION_FK", clientId, ClientsQueryRepository.AllClients)(_.id)
 
   override def * : ProvenShape[Notification] = (id.?, clientId, message, sent).mapTo[Notification]
-}
-
-object NotificationsQueryRepository {
-  val AllNotifications = TableQuery[NotificationsTable]
-
-  def addNotification(clientId: Long, message: String): DIO[Long, Effect.Write] =
-    (AllNotifications returning AllNotifications.map(_.id)) +=
-      Notification(None, clientId, message)
-
 }

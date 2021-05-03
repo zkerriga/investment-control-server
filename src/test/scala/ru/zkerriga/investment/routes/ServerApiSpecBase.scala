@@ -15,7 +15,7 @@ import ru.zkerriga.investment.base.ServerConfiguration
 import ru.zkerriga.investment.entities.openapi._
 import ru.zkerriga.investment.entities.{Login, TinkoffToken, VerifiedClient}
 import ru.zkerriga.investment.logic.ServiceLogic
-import ru.zkerriga.investment.storage.Client
+import ru.zkerriga.investment.storage.entities.Client
 
 
 trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with ScalatestRouteTest with Matchers with MockFactory {

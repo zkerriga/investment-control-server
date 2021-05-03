@@ -1,16 +1,21 @@
 package ru.zkerriga.investment.storage
 
-import slick.lifted.TableQuery
 import slick.jdbc.H2Profile.api._
-
 import monix.eval.Task
 
+import ru.zkerriga.investment.storage.entities.Client
+
+
 object ServerDatabase {
-  private val clients = TableQuery[ClientsTable]
+  private val clients = ClientsQueryRepository.AllClients
+  private val trackStocks = TrackStocksQueryRepository.AllTrackStocks
+  private val notifications = NotificationsQueryRepository.AllNotifications
+
   private val db = Database.forConfig("h2mem1")
 
+  /* todo: use flyway to create db */
   private val initSchema =
-    (clients.schema).create /* todo: use flyway to create db */
+    (clients.schema ++ trackStocks.schema ++ notifications.schema).create
 
   private val setupFuture: Task[Unit] = Task.fromFuture(db.run(initSchema))
 

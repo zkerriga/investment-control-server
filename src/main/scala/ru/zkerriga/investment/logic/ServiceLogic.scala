@@ -5,7 +5,7 @@ import sttp.tapir.model.UsernamePassword
 
 import ru.zkerriga.investment.entities.openapi.Stocks
 import ru.zkerriga.investment.entities.{Login, TinkoffToken, VerifiedClient}
-import ru.zkerriga.investment.storage.Client
+import ru.zkerriga.investment.storage.entities.Client
 
 
 /**

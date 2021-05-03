@@ -2,28 +2,12 @@ package ru.zkerriga.investment.storage
 
 import slick.dbio.Effect
 import slick.jdbc.H2Profile.api._
-import slick.lifted.ProvenShape
+
+import ru.zkerriga.investment.storage.entities.Client
+import ru.zkerriga.investment.storage.tables.ClientsTable
 
 
-case class Client(
-  id: Option[Long],
-  login: String,
-  passwordHash: String,
-  token: Option[String],
-  active: Boolean = true
-)
-
-class ClientsTable(tag: Tag) extends Table[Client](tag, "CLIENTS") {
-  def id: Rep[Long] = column("ID", O.PrimaryKey, O.AutoInc)
-  def login: Rep[String] = column("LOGIN", O.Unique)
-  def passwordHash: Rep[String] = column("PASSWORD_HASH")
-  def token: Rep[Option[String]] = column("TOKEN")
-  def active: Rep[Boolean] = column("ACTIVE")
-
-  override def * : ProvenShape[Client] = (id.?, login, passwordHash, token, active).mapTo[Client]
-}
-
-object ClientsQueryRepository {
+private[storage] object ClientsQueryRepository {
   val AllClients = TableQuery[ClientsTable]
 
   def addClient(login: String, passwordHash: String): DIO[Long, Effect.Write] =

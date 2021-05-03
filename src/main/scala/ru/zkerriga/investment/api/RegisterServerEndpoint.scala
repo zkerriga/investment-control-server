@@ -9,7 +9,7 @@ import scala.concurrent.Future
 import ru.zkerriga.investment.entities.TinkoffToken
 import ru.zkerriga.investment.logic.ServiceLogic
 import ru.zkerriga.investment.api.documentation.RegisterEndpoint
-import ru.zkerriga.investment.storage.Client
+import ru.zkerriga.investment.storage.entities.Client
 
 
 class RegisterServerEndpoint(serviceApi: ServiceLogic, exceptionHandler: ExceptionHandler[Task])(implicit s: Scheduler)

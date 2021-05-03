@@ -1,20 +1,11 @@
-package ru.zkerriga.investment.storage
+package ru.zkerriga.investment.storage.tables
 
-import slick.dbio.Effect
 import slick.jdbc.H2Profile.api._
 import slick.lifted.{ForeignKeyQuery, ProvenShape}
 
-import ru.zkerriga.investment.entities.StockOrder
+import ru.zkerriga.investment.storage.ClientsQueryRepository
+import ru.zkerriga.investment.storage.entities.{Client, TrackStock}
 
-
-case class TrackStock(
-  id: Option[Long],
-  clientId: Long,
-  figi: String,
-  stopLoss: Double,
-  takeProfit: Double,
-  active: Boolean = true
-)
 
 class TrackStocksTable(tag: Tag) extends Table[TrackStock](tag, "TRACK_STOCKS") {
   def id: Rep[Long] = column("ID", O.PrimaryKey, O.AutoInc)
@@ -29,13 +20,4 @@ class TrackStocksTable(tag: Tag) extends Table[TrackStock](tag, "TRACK_STOCKS") 
     foreignKey("CLIENT_FOR_TRACK_STOCK_FK", clientId, ClientsQueryRepository.AllClients)(_.id)
 
   override def * : ProvenShape[TrackStock] = (id.?, clientId, figi, stopLoss, takeProfit, active).mapTo[TrackStock]
-}
-
-object TrackStocksQueryRepository {
-  val AllTrackStocks = TableQuery[TrackStocksTable]
-
-  def addTrackStock(clientId: Long, stockOrder: StockOrder): DIO[Long, Effect.Write] =
-    (AllTrackStocks returning AllTrackStocks.map(_.id)) +=
-      TrackStock(None, clientId, stockOrder.figi, stockOrder.stopLoss, stockOrder.takeProfit)
-
 }
