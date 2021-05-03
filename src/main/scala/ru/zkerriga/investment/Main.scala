@@ -1,6 +1,7 @@
 package ru.zkerriga.investment
 
 import akka.actor.{ActorSystem, Terminated}
+import akka.http.scaladsl.model.Uri
 import monix.eval.Task
 import monix.execution.Scheduler
 
@@ -13,6 +14,11 @@ import ru.zkerriga.investment.storage._
 object Main {
   implicit val as: ActorSystem = ActorSystem()
   implicit val s: Scheduler = monix.execution.Scheduler.global
+
+  val baseUrl: Uri = Uri(
+    scheme = "http",
+    authority = Uri.Authority(host = Uri.Host("localhost"), port = 8080)
+  )
 
   private def terminateSystem: Task[Terminated] = Task.fromFuture(as.terminate())
 
@@ -28,7 +34,8 @@ object Main {
       List(
         new MarketServerEndpoint(service, exceptionHandler),
         new RegisterServerEndpoint(service, exceptionHandler)
-      )
+      ),
+      baseUrl
     )
   }
 
@@ -39,7 +46,7 @@ object Main {
     val server                      = Server(serverRoutes)
 
     val program = for {
-      http <- server.start("localhost", 8080)
+      http <- server.start(baseUrl)
       _ <- Console.putAnyLn("Press ENTER to stop server...")
       _ <- Console.readLine
       _ <- server.stop(http)

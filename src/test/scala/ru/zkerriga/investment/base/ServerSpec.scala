@@ -37,6 +37,6 @@ class ServerSpec extends ServerISpecBase {
       Main.createServerRoutes(
         new ServiceLogicImpl(new AsyncBcryptImpl, new TinkoffOpenApiClient, ServerDatabase)
       )
-    ).start(interface, port).runToFuture
+    ).start(Main.baseUrl).runToFuture
 
 }

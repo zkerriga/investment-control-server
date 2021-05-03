@@ -3,6 +3,7 @@ package ru.zkerriga.investment.routes
 import akka.http.scaladsl.server.Route
 import monix.execution.Scheduler
 
+import ru.zkerriga.investment.Main
 import ru.zkerriga.investment.api._
 
 
@@ -14,7 +15,8 @@ class ServerApiSpec extends ServerApiSpecBase {
       List(
         new MarketServerEndpoint(mockServiceApi, ExceptionHandlerForTask()),
         new RegisterServerEndpoint(mockServiceApi, ExceptionHandlerForTask())
-      )
+      ),
+      Main.baseUrl
     ).routes
 
 }
