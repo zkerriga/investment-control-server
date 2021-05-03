@@ -40,8 +40,8 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
   private val testUsernamePassword = UsernamePassword(testUsername, Some(testPassword))
   private val testLogin = Login(testUsername, testPassword)
   private val testCredentials = BasicHttpCredentials(testUsername, testPassword)
-  private val testClient = Client(1, testUsername, testPassword, None)
-  private val testVerifiedClient = VerifiedClient.fromClient(testClient, TinkoffToken("valid token"))
+  private val testClient = Client(Some(1), testUsername, testPassword, None)
+  private val testVerifiedClient = VerifiedClient(1, testUsername, TinkoffToken("valid token"))
 
   describe(s"POST $link/register") {
     it("register a new client") {

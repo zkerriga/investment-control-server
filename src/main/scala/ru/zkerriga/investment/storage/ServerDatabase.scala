@@ -19,7 +19,7 @@ object ServerDatabase {
 
   def close(): Task[Unit] = Task(db.close())
 
-  def registerClient(login: String, passwordHash: String): Task[Int] =
+  def registerClient(login: String, passwordHash: String): Task[Long] =
     run(ClientsQueryRepository.addClient(login, passwordHash))
 
   def findClientByLogin(login: String): Task[Option[Client]] =

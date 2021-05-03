@@ -33,7 +33,7 @@ abstract class ClientsDatabaseSuite extends AsyncFunSuite {
     (ClientsQueryRepository.AllClients.schema).create /* todo: use flyway to create db */
 
   protected val sampleClients = Seq(
-    Client(1, "login1", "hash:something1", None),
-    Client(2, "login2", "hash:something2", Some("token:something2")),
+    Client(None, "login1", "hash:something1", None),
+    Client(None, "login2", "hash:something2", Some("token:something2")),
   )
 }

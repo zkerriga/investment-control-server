@@ -29,18 +29,22 @@ class ServiceLogicImpl(bcrypt: AsyncBcrypt, openApiClient: OpenApiClient) extend
       .getOrElseF(Task.raiseError[Client](IncorrectCredentials()))
 
   def verifyToken(client: Client): Task[VerifiedClient] =
-    client.token
-      .fold(Task.raiseError[VerifiedClient](TokenDoesNotExist())){ token =>
-        Task.now(VerifiedClient.fromClient(client, TinkoffToken(token)))
-      }
+    (for {
+      id <- client.id
+      token <- client.token
+    } yield VerifiedClient(id, client.login, TinkoffToken(token)))
+      .fold(Task.raiseError[VerifiedClient](TokenDoesNotExist()))(Task.now)
 
   def updateToken(client: Client, token: TinkoffToken): Task[String] = {
-    openApiClient.`/sandbox/register`(token)
-      .redeemWith(
-        _ => Task.raiseError(InvalidToken()),
-        _ => ServerDatabase.updateClientToken(client.id, token.token)
-          .map(_ => client.login)
-      )
+    lazy val errorTask = Task.raiseError[String](InvalidToken())
+    client.id.fold(errorTask) { id =>
+      openApiClient.`/sandbox/register`(token)
+        .redeemWith(
+          _ => errorTask,
+          _ => ServerDatabase.updateClientToken(id, token.token)
+            .map(_ => client.login)
+        )
+    }
   }
 
   def getStocks(client: VerifiedClient, page: Int, onPage: Int): Task[Stocks] =
