@@ -6,13 +6,14 @@ import org.scalatest.funsuite.AsyncFunSuite
 
 import ClientsQueryRepository.AllClients
 import TrackStocksQueryRepository.AllTrackStocks
+import NotificationsQueryRepository.AllNotifications
 
 import slick.dbio.{DBIOAction, Effect, NoStream}
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.H2Profile.api._
 
 
-abstract class ClientsDatabaseSuite extends AsyncFunSuite {
+abstract class DatabaseSuite extends AsyncFunSuite {
   protected def test[R, S <: NoStream, E <: Effect](testName: String)
                                                    (testFun: DBIOAction[compatible.Assertion, S, E])
                                                    (implicit pos: source.Position): Unit = {
@@ -27,13 +28,15 @@ abstract class ClientsDatabaseSuite extends AsyncFunSuite {
         initSchema
           .andThen(AllClients.forceInsertAll(sampleClients))
           .andThen(AllTrackStocks.forceInsertAll(sampleTrackStocks))
+          .andThen(AllNotifications.forceInsertAll(sampleNotifications))
       ).flatMap(_ => db.run(testFun)).andThen { case _ => db.close() }
     }
   }
 
   private val initSchema =
     (ClientsQueryRepository.AllClients.schema ++
-      TrackStocksQueryRepository.AllTrackStocks.schema).create /* todo: use flyway to create db */
+      TrackStocksQueryRepository.AllTrackStocks.schema ++
+      NotificationsQueryRepository.AllNotifications.schema).create /* todo: use flyway to create db */
 
   protected val sampleClients = Seq(
     Client(Some(1), "login1", "hash:something1", None),
@@ -44,5 +47,10 @@ abstract class ClientsDatabaseSuite extends AsyncFunSuite {
     TrackStock(Some(1), clientId = 1, "FIGI1", 10.0, 40.0),
     TrackStock(Some(2), clientId = 1, "FIGI2", 100.0, 110.0),
     TrackStock(Some(3), clientId = 2, "FIGI3", 10.0, 40.0)
+  )
+
+  protected val sampleNotifications = Seq(
+    Notification(Some(1), clientId = 2, "First hello!"),
+    Notification(Some(2), clientId = 2, "Second hello!")
   )
 }

@@ -4,7 +4,7 @@ import org.scalatest.matchers.should.Matchers
 import ClientsQueryRepository._
 
 
-class ClientsQueryRepositoryTest extends ClientsDatabaseSuite with Matchers {
+class ClientsQueryRepositoryTest extends DatabaseSuite with Matchers {
 
   test("add new client should id") {
     for {

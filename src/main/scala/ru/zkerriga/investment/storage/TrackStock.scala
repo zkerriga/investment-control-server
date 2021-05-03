@@ -26,7 +26,7 @@ class TrackStocksTable(tag: Tag) extends Table[TrackStock](tag, "TRACK_STOCKS") 
 
   /* todo: change it with flyway */
   def client: ForeignKeyQuery[ClientsTable, Client] =
-    foreignKey("CLIENT_FK", clientId, ClientsQueryRepository.AllClients)(_.id)
+    foreignKey("CLIENT_FOR_TRACK_STOCK_FK", clientId, ClientsQueryRepository.AllClients)(_.id)
 
   override def * : ProvenShape[TrackStock] = (id.?, clientId, figi, stopLoss, takeProfit, active).mapTo[TrackStock]
 }
