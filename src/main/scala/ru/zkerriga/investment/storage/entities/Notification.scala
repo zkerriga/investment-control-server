@@ -2,8 +2,9 @@ package ru.zkerriga.investment.storage.entities
 
 
 case class Notification(
-  id: Option[Long],
+  id: Option[Long] = None,
   clientId: Long,
-  message: String,
+  trackStockId: Long,
+  sold: Boolean = true,
   sent: Boolean = false
 )

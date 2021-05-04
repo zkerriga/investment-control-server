@@ -10,7 +10,6 @@ import ru.zkerriga.investment.storage.tables.NotificationsTable
 private[storage] object NotificationsQueryRepository {
   val AllNotifications = TableQuery[NotificationsTable]
 
-  def addNotification(clientId: Long, message: String): DIO[Long, Effect.Write] =
-    (AllNotifications returning AllNotifications.map(_.id)) +=
-      Notification(None, clientId, message)
+  def addNotifications(notifications: Seq[Notification]): DIO[Option[Int], Effect.Write] =
+    AllNotifications ++= notifications
 }

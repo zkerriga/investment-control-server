@@ -52,7 +52,7 @@ abstract class DatabaseSuite extends AsyncFunSuite {
   )
 
   protected val sampleNotifications = Seq(
-    Notification(Some(1), clientId = 2, "First hello!"),
-    Notification(Some(2), clientId = 2, "Second hello!")
+    Notification(Some(1), clientId = 1, trackStockId = 1),
+    Notification(Some(2), clientId = 1, trackStockId = 2)
   )
 }
