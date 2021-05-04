@@ -9,8 +9,8 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AsyncFunSuite
 import scala.concurrent.Future
 
-import ru.zkerriga.investment.entities.openapi.Stocks
-import ru.zkerriga.investment.entities.{Login, TinkoffToken}
+import ru.zkerriga.investment.entities.openapi.{PlacedMarketOrder, Stock, Stocks}
+import ru.zkerriga.investment.entities.{Login, StockOrder, TinkoffToken}
 
 
 trait ServerISpecBase extends AsyncFunSuite with ServerConfiguration with BeforeAndAfterAll {
@@ -20,6 +20,7 @@ trait ServerISpecBase extends AsyncFunSuite with ServerConfiguration with Before
   import io.circe.generic.auto._
 
   implicit def as: ActorSystem
+  def validToken: TinkoffToken
 
   test("registrations") {
     val successful = for {
@@ -44,11 +45,11 @@ trait ServerISpecBase extends AsyncFunSuite with ServerConfiguration with Before
     }
   }
 
-  ignore("get stocks") {
+  test("get stocks") {
     val login = logins(4)
     for {
       _ <- registerClient(login)
-      _ <- updateToken(login, TinkoffToken("VALID TOKEN???")) /* todo: add mock for openApi */
+      _ <- updateToken(login, validToken) /* todo: add mock for openApi */
       stocks1 <- getStocks(login, Map("page" -> 1, "onPage" -> 2))
       stocks2 <- getStocks(login, Map("onPage" -> 2))
       stocks3 <- getStocks(login, Map.empty)
@@ -59,8 +60,23 @@ trait ServerISpecBase extends AsyncFunSuite with ServerConfiguration with Before
     }
   }
 
+  test("buy stocks") {
+    val login = logins(5)
+    for {
+      _ <- registerClient(login)
+      _ <- updateToken(login, validToken)
+      stocks <- getStocks(login, Map.empty)
+      figi = stocks.instruments.collectFirst{ case Stock(figi, _, _, _, _, _, "USD", _) => figi }
+      buyRes <- buyStocks(login, StockOrder(figi = figi.getOrElse(""), lots = 1, stopLoss = 1.0, takeProfit = 100.0))
+    } yield {
+      assert(stocks.total > 0)
+      assert(figi.nonEmpty)
+      assert(buyRes.executedLots === 1 && buyRes.requestedLots === 1)
+    }
+  }
+
   private def registerClient(login: Login): Future[String] =
-    SimpleHttpClient.post[String](
+    SimpleHttpClient.postWithoutCreds[String](
       Uri(s"$link/register"),
       toEntity(login)
     )
@@ -75,6 +91,13 @@ trait ServerISpecBase extends AsyncFunSuite with ServerConfiguration with Before
   private def getStocks(login: Login, queryArgs: Map[String, Int]): Future[Stocks] =
     SimpleHttpClient.get[Stocks](
       uri = Uri(s"$link/market/stocks" ++ queryArgs.map{ case (s, i) => s"$s=$i" }.mkString("?", "&", "")),
+      toCredentials(login)
+    )
+
+  private def buyStocks(login: Login, stockOrder: StockOrder): Future[PlacedMarketOrder] =
+    SimpleHttpClient.post[PlacedMarketOrder](
+      uri = Uri(s"$link/orders/market-order/buy"),
+      toEntity(stockOrder),
       toCredentials(login)
     )
 

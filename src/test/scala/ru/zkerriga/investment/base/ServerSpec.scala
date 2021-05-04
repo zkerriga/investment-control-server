@@ -10,13 +10,16 @@ import scala.concurrent.duration.Duration
 
 import ru.zkerriga.investment.storage.ServerDatabase
 import ru.zkerriga.investment.logic.{AsyncBcryptImpl, ServiceLogicImpl, TinkoffOpenApiClient}
-import ru.zkerriga.investment.{Main, Server}
+import ru.zkerriga.investment.{Main, Server, TokenForTest}
+import ru.zkerriga.investment.entities.TinkoffToken
 
 
 class ServerSpec extends ServerISpecBase {
 
   implicit lazy val as: ActorSystem = ActorSystem()
   implicit lazy val s: Scheduler = monix.execution.Scheduler.global
+
+  val validToken: TinkoffToken = TokenForTest.token
 
   override protected def beforeAll(): Unit = {
     Await.result(server, Duration.Inf)

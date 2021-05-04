@@ -12,9 +12,15 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 
 object SimpleHttpClient extends LazyLogging {
-  def post[U: FromResponseUnmarshaller](uri: Uri, entity: RequestEntity = HttpEntity.Empty)(implicit ac: ActorSystem, ec: ExecutionContext): Future[U] = {
+  def postWithoutCreds[U: FromResponseUnmarshaller](uri: Uri, entity: RequestEntity = HttpEntity.Empty)(implicit ac: ActorSystem, ec: ExecutionContext): Future[U] = {
     logRequest(uri, POST)
     Http().singleRequest(HttpRequest(POST, uri = uri, entity = entity))
+      .flatMap(response => Unmarshal(response).to[U])
+  }
+
+  def post[U: FromResponseUnmarshaller](uri: Uri, entity: RequestEntity = HttpEntity.Empty, credentials: HttpCredentials)(implicit ac: ActorSystem, ec: ExecutionContext): Future[U] = {
+    logRequest(uri, POST)
+    Http().singleRequest(HttpRequest(POST, uri = uri, entity = entity).addCredentials(credentials))
       .flatMap(response => Unmarshal(response).to[U])
   }
 
