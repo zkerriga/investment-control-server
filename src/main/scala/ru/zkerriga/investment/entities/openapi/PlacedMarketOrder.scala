@@ -1,13 +1,12 @@
 package ru.zkerriga.investment.entities.openapi
 
 
-case class Order (
+case class PlacedMarketOrder(
   orderId: String,
-  figi: String,
   operation: String,
   status: String,
+  rejectReason: Option[String],
+  message: Option[String],
   requestedLots: Int,
-  executedLots: Int,
-  `type`: String,
-  price: Double
+  executedLots: Int
 )

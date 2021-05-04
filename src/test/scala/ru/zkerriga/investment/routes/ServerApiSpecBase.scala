@@ -9,11 +9,11 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalamock.scalatest.MockFactory
 import sttp.tapir.model.UsernamePassword
-import ru.zkerriga.investment.{IncorrectCredentials, InvalidToken, LoginAlreadyExist, PageNotFound}
+import ru.zkerriga.investment.{IncorrectCredentials, InvalidToken, LoginAlreadyExist, NotEnoughBalance, PageNotFound}
 import ru.zkerriga.investment.api.ExceptionResponse
 import ru.zkerriga.investment.base.ServerConfiguration
 import ru.zkerriga.investment.entities.openapi._
-import ru.zkerriga.investment.entities.{Login, TinkoffToken, VerifiedClient}
+import ru.zkerriga.investment.entities.{Login, StockOrder, TinkoffToken, VerifiedClient}
 import ru.zkerriga.investment.logic.ServiceLogic
 import ru.zkerriga.investment.storage.entities.Client
 
@@ -35,6 +35,9 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
   private def getStocks(page: Int, onPage: Int): HttpRequest =
     Get(s"$api/market/stocks?page=$page&onPage=$onPage")
 
+  private def buyStocks(stockOrder: StockOrder): HttpRequest =
+    Post(s"$api/orders/market-order/buy", HttpEntity(ContentTypes.`application/json`, stockOrder.asJson.noSpaces))
+
   private val testUsername = "username"
   private val testPassword = "pass"
   private val testUsernamePassword = UsernamePassword(testUsername, Some(testPassword))
@@ -42,6 +45,8 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
   private val testCredentials = BasicHttpCredentials(testUsername, testPassword)
   private val testClient = Client(Some(1), testUsername, testPassword, None)
   private val testVerifiedClient = VerifiedClient(1, testUsername, TinkoffToken("valid token"))
+  private val testStockOrder = StockOrder("A1B2C3", 1, 90.0, 120.0)
+  private val testOrderResponse = PlacedMarketOrder("ae1-12c", "Buy", "Fill", None, None, 1, 1)
 
   describe(s"POST $link/register") {
     it("register a new client") {
@@ -115,16 +120,16 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
     }
   }
 
-  describe(s"GET $link/market/stocks") {
-    def mockVerify = {
-      (mockServiceApi.verifyCredentials _)
-        .expects(testUsernamePassword)
-        .returns(Task.now(testClient))
-      (mockServiceApi.verifyToken _)
-        .expects(testClient)
-        .returns(Task.now(testVerifiedClient))
-    }
+  def mockVerify = {
+    (mockServiceApi.verifyCredentials _)
+      .expects(testUsernamePassword)
+      .returns(Task.now(testClient))
+    (mockServiceApi.verifyToken _)
+      .expects(testClient)
+      .returns(Task.now(testVerifiedClient))
+  }
 
+  describe(s"GET $link/market/stocks") {
     it("get normal list") {
       val stocks = Stocks(total = 2, instruments = Seq(
         Stock("A1B2C3", "AAA", "C3B2A1", None, 1, None, "USD", "Company1"),
@@ -149,6 +154,31 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
       getStocks(1000, 1000) ~> addCredentials(testCredentials) ~> route ~> check {
         status shouldEqual StatusCodes.BadRequest
         responseAs[ExceptionResponse] shouldBe ExceptionResponse("Page not found")
+      }
+    }
+  }
+
+  describe(s"POST $link/orders/market-order/buy") {
+    it("not enough balance") {
+      mockVerify
+      (mockServiceApi.buyStocks _)
+        .expects(testVerifiedClient, testStockOrder)
+        .returns(Task.raiseError[PlacedMarketOrder](NotEnoughBalance()))
+
+      buyStocks(testStockOrder) ~> addCredentials(testCredentials) ~> route ~> check {
+        status shouldEqual StatusCodes.BadRequest
+        responseAs[ExceptionResponse] shouldBe ExceptionResponse("Not enough balance")
+      }
+    }
+    it("successful buy") {
+      mockVerify
+      (mockServiceApi.buyStocks _)
+        .expects(testVerifiedClient, testStockOrder)
+        .returns(Task.now(testOrderResponse))
+
+      buyStocks(testStockOrder) ~> addCredentials(testCredentials) ~> route ~> check {
+        status shouldEqual StatusCodes.OK
+        responseAs[PlacedMarketOrder] shouldBe testOrderResponse
       }
     }
   }

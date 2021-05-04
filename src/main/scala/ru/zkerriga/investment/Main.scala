@@ -34,7 +34,8 @@ object Main {
     new ServerRoutesImpl(
       List(
         new MarketServerEndpoint(service, exceptionHandler),
-        new RegisterServerEndpoint(service, exceptionHandler)
+        new RegisterServerEndpoint(service, exceptionHandler),
+        new OrdersServerEndpoint(service, exceptionHandler)
       ),
       baseUrl
     )

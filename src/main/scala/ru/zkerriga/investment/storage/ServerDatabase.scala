@@ -3,6 +3,7 @@ package ru.zkerriga.investment.storage
 import slick.jdbc.H2Profile.api._
 import monix.eval.Task
 
+import ru.zkerriga.investment.entities.StockOrder
 import ru.zkerriga.investment.storage.entities.Client
 
 
@@ -32,4 +33,7 @@ object ServerDatabase extends Dao {
 
   def updateClientToken(clientId: Long, token: String): Task[Int] =
     run(ClientsQueryRepository.updateToken(clientId, token))
+
+  def registerStock(clientId: Long, order: StockOrder): Task[Long] =
+    run(TrackStocksQueryRepository.addTrackStock(clientId, order))
 }

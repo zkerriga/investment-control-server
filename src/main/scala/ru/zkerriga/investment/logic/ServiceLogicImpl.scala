@@ -4,7 +4,7 @@ import cats.data.OptionT
 import monix.eval.Task
 import sttp.tapir.model.UsernamePassword
 
-import ru.zkerriga.investment.entities.openapi.{Order, Stocks, TinkoffResponse}
+import ru.zkerriga.investment.entities.openapi.{PlacedMarketOrder, Stocks, TinkoffResponse}
 import ru.zkerriga.investment.entities.{Login, StockOrder, TinkoffToken, VerifiedClient}
 import ru.zkerriga.investment.storage.Dao
 import ru.zkerriga.investment.storage.entities.Client
@@ -62,8 +62,9 @@ class ServiceLogicImpl(bcrypt: AsyncBcrypt, openApiClient: OpenApiClient, dao: D
         ))
     }
 
-  def buyStocks(client: VerifiedClient, stockOrder: StockOrder): Task[Order] =
+  def buyStocks(client: VerifiedClient, stockOrder: StockOrder): Task[PlacedMarketOrder] =
     openApiClient.`/orders/market-order`(client.token, stockOrder)
       .map(response => response.payload)
-      .onErrorFallbackTo(Task.raiseError(NotEnoughBalance()))
+      .onErrorFallbackTo(Task.raiseError(NotEnoughBalance())) <*
+        dao.registerStock(client.id, stockOrder)
 }

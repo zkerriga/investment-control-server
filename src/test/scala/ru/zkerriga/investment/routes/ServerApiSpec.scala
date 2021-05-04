@@ -15,7 +15,8 @@ class ServerApiSpec extends ServerApiSpecBase {
     new ServerRoutesImpl(
       List(
         new MarketServerEndpoint(mockServiceApi, ExceptionHandlerForTask()),
-        new RegisterServerEndpoint(mockServiceApi, ExceptionHandlerForTask())
+        new RegisterServerEndpoint(mockServiceApi, ExceptionHandlerForTask()),
+        new OrdersServerEndpoint(mockServiceApi, ExceptionHandlerForTask())
       ),
       Main.baseUrl
     ).routes

@@ -2,6 +2,7 @@ package ru.zkerriga.investment.storage
 
 import monix.eval.Task
 
+import ru.zkerriga.investment.entities.StockOrder
 import ru.zkerriga.investment.storage.entities.Client
 
 
@@ -30,4 +31,10 @@ trait Dao {
    * @param clientId id of an existing(!) client from the database
    */
   def updateClientToken(clientId: Long, token: String): Task[Int]
+
+  /**
+   * Adds information about the purchased asset to the database for further tracking
+   * @return the record id
+   */
+  def registerStock(clientId: Long, order: StockOrder): Task[Long]
 }

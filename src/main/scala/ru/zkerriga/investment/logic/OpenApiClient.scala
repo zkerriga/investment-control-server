@@ -15,5 +15,5 @@ trait OpenApiClient {
 
   def `/market/stocks`(token: TinkoffToken): Task[TinkoffResponse[Stocks]]
 
-  def `/orders/market-order`(token: TinkoffToken, stockOrder: StockOrder): Task[TinkoffResponse[Order]]
+  def `/orders/market-order`(token: TinkoffToken, stockOrder: StockOrder): Task[TinkoffResponse[PlacedMarketOrder]]
 }
