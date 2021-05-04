@@ -11,7 +11,7 @@ import ru.zkerriga.investment.storage.tables.TrackStocksTable
 private[storage] object TrackStocksQueryRepository {
   val AllTrackStocks = TableQuery[TrackStocksTable]
 
-  def addTrackStock(clientId: Long, stockOrder: StockOrder): DIO[Long, Effect.Write] =
+  def addTrackStock(clientId: Long, order: StockOrder): DIO[Long, Effect.Write] =
     (AllTrackStocks returning AllTrackStocks.map(_.id)) +=
-      TrackStock(None, clientId, stockOrder.figi, stockOrder.stopLoss, stockOrder.takeProfit)
+      TrackStock(None, clientId, order.figi, order.lots, order.stopLoss, order.takeProfit)
 }

@@ -3,8 +3,8 @@ package ru.zkerriga.investment.logic
 import monix.eval.Task
 import sttp.tapir.model.UsernamePassword
 
-import ru.zkerriga.investment.entities.openapi.Stocks
-import ru.zkerriga.investment.entities.{Login, TinkoffToken, VerifiedClient}
+import ru.zkerriga.investment.entities.openapi.{Order, Stocks}
+import ru.zkerriga.investment.entities.{Login, StockOrder, TinkoffToken, VerifiedClient}
 import ru.zkerriga.investment.storage.entities.Client
 
 
@@ -52,4 +52,10 @@ trait ServiceLogic {
    *         and a PageNotFound if there is nothing on the page
    */
   def getStocks(client: VerifiedClient, page: Int, onPage: Int): Task[Stocks]
+
+  /**
+   * Buys stocks using OpenAPI and registers asset tracking in the database
+   * @return a response from OpenAPI with information about the request
+   */
+  def buyStocks(client: VerifiedClient, stockOrder: StockOrder): Task[Order]
 }

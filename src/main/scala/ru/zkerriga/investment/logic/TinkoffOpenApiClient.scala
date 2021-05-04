@@ -6,10 +6,11 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.HttpMethods.{GET, POST}
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.{FromResponseUnmarshaller, Unmarshal}
+import io.circe.Encoder
 import monix.eval.Task
 import monix.execution.Scheduler
 
-import ru.zkerriga.investment.entities.TinkoffToken
+import ru.zkerriga.investment.entities.{StockOrder, TinkoffToken}
 import ru.zkerriga.investment.entities.openapi._
 
 
@@ -30,12 +31,19 @@ class TinkoffOpenApiClient(implicit as: ActorSystem, s: Scheduler) extends OpenA
       POST,
       "/sandbox/currencies/balance",
       token,
-      HttpEntity(ContentTypes.`application/json`, balance.asJson.noSpaces)
+      jsonRequestEntity(balance)
     )
 
   override def `/market/stocks`(token: TinkoffToken): Task[TinkoffResponse[Stocks]] =
     request[TinkoffResponse[Stocks]](GET, "/market/stocks", token)
 
+  def `/orders/market-order`(token: TinkoffToken, stockOrder: StockOrder): Task[TinkoffResponse[Order]] =
+    request[TinkoffResponse[Order]](
+      POST,
+      s"/orders/market-order?figi=${stockOrder.figi}",
+      token,
+      jsonRequestEntity(MarketOrderRequest(stockOrder.lots, "Buy"))
+    )
 
   private val link = "https://api-invest.tinkoff.ru/openapi/sandbox"
 
@@ -43,6 +51,9 @@ class TinkoffOpenApiClient(implicit as: ActorSystem, s: Scheduler) extends OpenA
     require(path.startsWith("/"), "Path for request must starts with `/`!")
     Uri(s"$link$path")
   }
+
+  private def jsonRequestEntity[A](entity: A)(implicit encoder: Encoder[A]): RequestEntity =
+    HttpEntity(ContentTypes.`application/json`, entity.asJson.noSpaces)
 
   private def request[U: FromResponseUnmarshaller](
       method: HttpMethod,

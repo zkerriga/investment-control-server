@@ -19,3 +19,6 @@ final case class TokenDoesNotExist()
 
 final case class PageNotFound()
   extends ServiceException("Page not found")
+
+final case class NotEnoughBalance()
+  extends ServiceException("Not enough balance")

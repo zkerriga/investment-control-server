@@ -46,9 +46,9 @@ abstract class DatabaseSuite extends AsyncFunSuite {
   )
 
   protected val sampleTrackStocks = Seq(
-    TrackStock(Some(1), clientId = 1, "FIGI1", 10.0, 40.0),
-    TrackStock(Some(2), clientId = 1, "FIGI2", 100.0, 110.0),
-    TrackStock(Some(3), clientId = 2, "FIGI3", 10.0, 40.0)
+    TrackStock(Some(1), clientId = 1, "FIGI1", lots = 1, 10.0, 40.0),
+    TrackStock(Some(2), clientId = 1, "FIGI2", lots = 1, 100.0, 110.0),
+    TrackStock(Some(3), clientId = 2, "FIGI3", lots = 1, 10.0, 40.0)
   )
 
   protected val sampleNotifications = Seq(
