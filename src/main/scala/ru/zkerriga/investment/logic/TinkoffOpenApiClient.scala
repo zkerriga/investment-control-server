@@ -21,12 +21,12 @@ class TinkoffOpenApiClient(implicit as: ActorSystem, s: Scheduler) extends OpenA
 
   private lazy val startBalance = SandboxSetCurrencyBalanceRequest("USD", 1000.0)
 
-  override def `/sandbox/register`(token: TinkoffToken): Task[Register] =
-    request[Register](POST, "/sandbox/register", token) <*
+  override def `/sandbox/register`(token: TinkoffToken): Task[TinkoffResponse[Empty]] =
+    request[TinkoffResponse[Empty]](POST, "/sandbox/register", token) <*
       `/sandbox/currencies/balance`(token, startBalance)
 
-  private def `/sandbox/currencies/balance`(token: TinkoffToken, balance: SandboxSetCurrencyBalanceRequest): Task[Register] =
-    request[Register](
+  private def `/sandbox/currencies/balance`(token: TinkoffToken, balance: SandboxSetCurrencyBalanceRequest): Task[TinkoffResponse[Empty]] =
+    request[TinkoffResponse[Empty]](
       POST,
       "/sandbox/currencies/balance",
       token,

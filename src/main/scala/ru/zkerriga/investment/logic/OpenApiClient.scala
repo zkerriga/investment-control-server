@@ -11,7 +11,7 @@ import ru.zkerriga.investment.entities.openapi._
  * https://tinkoffcreditsystems.github.io/invest-openapi/swagger-ui
  */
 trait OpenApiClient {
-  def `/sandbox/register`(token: TinkoffToken): Task[Register]
+  def `/sandbox/register`(token: TinkoffToken): Task[TinkoffResponse[Empty]]
 
   def `/market/stocks`(token: TinkoffToken): Task[TinkoffResponse[Stocks]]
 }
