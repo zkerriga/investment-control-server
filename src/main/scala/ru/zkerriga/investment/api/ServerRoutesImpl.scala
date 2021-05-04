@@ -9,8 +9,9 @@ import sttp.tapir.openapi.{Contact, Info, OpenAPI}
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.akkahttp.AkkaHttpServerInterpreter
 import sttp.tapir.swagger.akkahttp.SwaggerAkka
-
 import scala.concurrent.Future
+
+import ru.zkerriga.investment.api.endpoints.Endpoints
 
 
 class ServerRoutesImpl(endpoints: List[Endpoints[Future]], baseUrl: Uri) extends ServerRoutes {

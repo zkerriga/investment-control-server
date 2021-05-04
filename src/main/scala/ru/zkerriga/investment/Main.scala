@@ -8,6 +8,7 @@ import monix.execution.Scheduler
 import ru.zkerriga.investment.logging.Console
 import ru.zkerriga.investment.logic._
 import ru.zkerriga.investment.api._
+import ru.zkerriga.investment.api.endpoints._
 import ru.zkerriga.investment.storage._
 
 

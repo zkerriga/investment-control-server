@@ -1,4 +1,4 @@
-package ru.zkerriga.investment.api
+package ru.zkerriga.investment.api.endpoints
 
 import monix.eval.Task
 import monix.execution.Scheduler
@@ -6,9 +6,10 @@ import sttp.tapir.model.UsernamePassword
 import sttp.tapir.server.ServerEndpoint
 import scala.concurrent.Future
 
+import ru.zkerriga.investment.api.documentation.RegisterEndpoint
+import ru.zkerriga.investment.api.{ExceptionHandler, ExceptionResponse}
 import ru.zkerriga.investment.entities.TinkoffToken
 import ru.zkerriga.investment.logic.ServiceLogic
-import ru.zkerriga.investment.api.documentation.RegisterEndpoint
 import ru.zkerriga.investment.storage.entities.Client
 
 

@@ -5,6 +5,7 @@ import monix.execution.Scheduler
 
 import ru.zkerriga.investment.Main
 import ru.zkerriga.investment.api._
+import ru.zkerriga.investment.api.endpoints._
 
 
 class ServerApiSpec extends ServerApiSpecBase {
