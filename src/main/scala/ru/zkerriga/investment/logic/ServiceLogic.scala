@@ -4,7 +4,7 @@ import monix.eval.Task
 import sttp.tapir.model.UsernamePassword
 
 import ru.zkerriga.investment.entities.openapi.{PlacedMarketOrder, Stocks}
-import ru.zkerriga.investment.entities.{Login, StockOrder, TinkoffToken, VerifiedClient}
+import ru.zkerriga.investment.entities.{Login, Notifications, StockOrder, TinkoffToken, VerifiedClient}
 import ru.zkerriga.investment.storage.entities.Client
 
 
@@ -59,4 +59,10 @@ trait ServiceLogic {
    *         and a NotEnoughBalance exception otherwise
    */
   def buyStocks(client: VerifiedClient, stockOrder: StockOrder): Task[PlacedMarketOrder]
+
+  /**
+   * Accesses the database and generates a list of notifications for the client
+   * @return all notifications for the client
+   */
+  def getAllNotifications(client: VerifiedClient): Task[Notifications]
 }

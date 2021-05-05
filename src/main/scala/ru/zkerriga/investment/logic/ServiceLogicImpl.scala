@@ -5,9 +5,9 @@ import monix.eval.Task
 import sttp.tapir.model.UsernamePassword
 
 import ru.zkerriga.investment.entities.openapi.{PlacedMarketOrder, Stocks, TinkoffResponse}
-import ru.zkerriga.investment.entities.{Login, StockOrder, TinkoffToken, VerifiedClient}
+import ru.zkerriga.investment.entities.{Login, NotificationMessage, Notifications, StockOrder, TinkoffToken, VerifiedClient}
 import ru.zkerriga.investment.storage.Dao
-import ru.zkerriga.investment.storage.entities.Client
+import ru.zkerriga.investment.storage.entities.{Client, Notification, TrackStock}
 import ru.zkerriga.investment._
 
 
@@ -67,4 +67,15 @@ class ServiceLogicImpl(bcrypt: AsyncBcrypt, openApiClient: OpenApiClient, dao: D
       .map(response => response.payload)
       .onErrorFallbackTo(Task.raiseError(NotEnoughBalance())) <*
         dao.registerStock(client.id, stockOrder)
+
+  def getAllNotifications(client: VerifiedClient): Task[Notifications] =
+    dao.getAllNotificationsAndMarkThemSent(client.id) map { seq =>
+      Notifications(
+        total = seq.size,
+        notifications = seq map {
+          /* todo: add info to notification */
+          case (_, trackStock) => NotificationMessage(StockOrder.from(trackStock), "Sold")
+        }
+      )
+    }
 }

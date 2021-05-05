@@ -13,7 +13,7 @@ import ru.zkerriga.investment.{IncorrectCredentials, InvalidToken, LoginAlreadyE
 import ru.zkerriga.investment.api.ExceptionResponse
 import ru.zkerriga.investment.base.ServerConfiguration
 import ru.zkerriga.investment.entities.openapi._
-import ru.zkerriga.investment.entities.{Login, StockOrder, TinkoffToken, VerifiedClient}
+import ru.zkerriga.investment.entities._
 import ru.zkerriga.investment.logic.ServiceLogic
 import ru.zkerriga.investment.storage.entities.Client
 
@@ -38,6 +38,9 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
   private def buyStocks(stockOrder: StockOrder): HttpRequest =
     Post(s"$api/orders/market-order/buy", HttpEntity(ContentTypes.`application/json`, stockOrder.asJson.noSpaces))
 
+  private def getNotifications: HttpRequest =
+    Get(s"$api/notifications/all")
+
   private val testUsername = "username"
   private val testPassword = "pass"
   private val testUsernamePassword = UsernamePassword(testUsername, Some(testPassword))
@@ -47,6 +50,7 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
   private val testVerifiedClient = VerifiedClient(1, testUsername, TinkoffToken("valid token"))
   private val testStockOrder = StockOrder("A1B2C3", 1, 90.0, 120.0)
   private val testOrderResponse = PlacedMarketOrder("ae1-12c", "Buy", "Fill", None, None, 1, 1)
+  private val testNotifications = Notifications(1, Seq(NotificationMessage(testStockOrder, "Sold")))
 
   describe(s"POST $link/register") {
     it("register a new client") {
@@ -179,6 +183,20 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
       buyStocks(testStockOrder) ~> addCredentials(testCredentials) ~> route ~> check {
         status shouldEqual StatusCodes.OK
         responseAs[PlacedMarketOrder] shouldBe testOrderResponse
+      }
+    }
+  }
+
+  describe(s"GET $link/notifications/all") {
+    it("should return notifications") {
+      mockVerify
+      (mockServiceApi.getAllNotifications _)
+        .expects(testVerifiedClient)
+        .returns(Task.now(testNotifications))
+
+      getNotifications ~> addCredentials(testCredentials) ~> route ~> check {
+        status shouldEqual StatusCodes.OK
+        responseAs[Notifications] shouldBe testNotifications
       }
     }
   }
