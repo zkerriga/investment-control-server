@@ -4,7 +4,7 @@ import slick.jdbc.H2Profile.api._
 import monix.eval.Task
 
 import ru.zkerriga.investment.entities.StockOrder
-import ru.zkerriga.investment.storage.entities.Client
+import ru.zkerriga.investment.storage.entities.{Client, Notification, TrackStock}
 
 
 object ServerDatabase extends Dao {
@@ -36,4 +36,14 @@ object ServerDatabase extends Dao {
 
   def registerStock(clientId: Long, order: StockOrder): Task[Long] =
     run(TrackStocksQueryRepository.addTrackStock(clientId, order))
+
+  def getAllNotificationsAndMarkThemSent(clientId: Long): Task[Seq[(Notification, TrackStock)]] =
+    Task.deferFutureAction { implicit scheduler =>
+      db.run(
+        (for {
+          seq <- NotificationsQueryRepository.getAllUnsentNotificationsWithTrackStock(clientId)
+          _ <- NotificationsQueryRepository.markNotificationsAsSent(clientId)
+        } yield seq).transactionally
+      )
+    }
 }

@@ -33,9 +33,10 @@ object Main {
     val exceptionHandler: ExceptionHandler[Task] = ExceptionHandlerForTask()
     new ServerRoutesImpl(
       List(
-        new MarketServerEndpoint(service, exceptionHandler),
         new RegisterServerEndpoint(service, exceptionHandler),
-        new OrdersServerEndpoint(service, exceptionHandler)
+        new MarketServerEndpoint(service, exceptionHandler),
+        new OrdersServerEndpoint(service, exceptionHandler),
+        new NotificationsServerEndpoint(service, exceptionHandler),
       ),
       baseUrl
     )

@@ -14,9 +14,10 @@ class ServerApiSpec extends ServerApiSpecBase {
   override def route: Route =
     new ServerRoutesImpl(
       List(
-        new MarketServerEndpoint(mockServiceApi, ExceptionHandlerForTask()),
         new RegisterServerEndpoint(mockServiceApi, ExceptionHandlerForTask()),
-        new OrdersServerEndpoint(mockServiceApi, ExceptionHandlerForTask())
+        new MarketServerEndpoint(mockServiceApi, ExceptionHandlerForTask()),
+        new OrdersServerEndpoint(mockServiceApi, ExceptionHandlerForTask()),
+        new NotificationsServerEndpoint(mockServiceApi, ExceptionHandlerForTask()),
       ),
       Main.baseUrl
     ).routes
