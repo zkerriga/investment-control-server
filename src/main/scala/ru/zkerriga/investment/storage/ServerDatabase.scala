@@ -7,7 +7,7 @@ import ru.zkerriga.investment.entities.StockOrder
 import ru.zkerriga.investment.storage.entities.{Client, Notification, TrackStock}
 
 
-object ServerDatabase extends ClientsDao {
+object ServerDatabase extends ClientsDao with MonitoringDao {
   private val clients = ClientsQueryRepository.AllClients
   private val trackStocks = TrackStocksQueryRepository.AllTrackStocks
   private val notifications = NotificationsQueryRepository.AllNotifications
@@ -46,4 +46,10 @@ object ServerDatabase extends ClientsDao {
         } yield seq).transactionally
       )
     }
+
+  def getAllTrackedStocks: Task[Map[ServerDatabase.FIGI, TrackStock]] = ???
+
+  def markStocksUntracked(stocks: Seq[TrackStock]): Task[Unit] = ???
+
+  def addNotifications(notifications: Seq[Notification]): Task[Unit] = ???
 }

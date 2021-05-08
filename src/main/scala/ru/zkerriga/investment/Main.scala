@@ -23,10 +23,9 @@ object Main {
 
   private def terminateSystem: Task[Terminated] = Task.fromFuture(as.terminate())
 
-  def createServiceApi(dao: ClientsDao): ServiceLogic = {
-    val tinkoffOpenApiClient: OpenApiClient = new TinkoffOpenApiClient
+  def createServiceApi(dao: ClientsDao, openApiClient: OpenApiClient): ServiceLogic = {
     val encryption: AsyncBcrypt = new AsyncBcryptImpl
-    new ServiceLogicImpl(encryption, tinkoffOpenApiClient, dao)
+    new ServiceLogicImpl(encryption, openApiClient, dao)
   }
 
   def createServerRoutes(service: ServiceLogic): ServerRoutes = {
@@ -43,10 +42,12 @@ object Main {
   }
 
   def main(args: Array[String]): Unit = {
-    val dao: ServerDatabase.type    = ServerDatabase
-    val service: ServiceLogic       = createServiceApi(dao)
-    val serverRoutes: ServerRoutes  = createServerRoutes(service)
-    val server                      = Server(serverRoutes)
+    val dao: ServerDatabase.type      = ServerDatabase
+    val openApiClient: OpenApiClient  = new TinkoffOpenApiClient
+    val service: ServiceLogic         = createServiceApi(dao, openApiClient)
+    val serverRoutes: ServerRoutes    = createServerRoutes(service)
+    val server                        = Server(serverRoutes)
+    val monitor                       = new StocksMonitoring(openApiClient, dao)
 
     val program = for {
       http <- server.start(baseUrl)
@@ -56,7 +57,10 @@ object Main {
       _ <- Task.parZip2(terminateSystem, dao.close())
     } yield ()
 
-    program.runSyncUnsafe()
+    Task.racePair(program, monitor.start).foreach {
+      case Left((_, fiber)) => fiber.cancel
+      case Right((fiber, _)) => fiber.cancel
+    }
   }
 
 }
