@@ -4,10 +4,10 @@ import cats.data.OptionT
 import monix.eval.Task
 import sttp.tapir.model.UsernamePassword
 
-import ru.zkerriga.investment.entities.openapi.{PlacedMarketOrder, Stocks, TinkoffResponse}
+import ru.zkerriga.investment.entities.openapi.{MarketOrderRequest, PlacedMarketOrder, Stocks}
 import ru.zkerriga.investment.entities.{Login, NotificationMessage, Notifications, StockOrder, TinkoffToken, VerifiedClient}
 import ru.zkerriga.investment.storage.ClientsDao
-import ru.zkerriga.investment.storage.entities.{Client, Notification, TrackStock}
+import ru.zkerriga.investment.storage.entities.Client
 import ru.zkerriga.investment._
 
 
@@ -62,11 +62,11 @@ class ServiceLogicImpl(bcrypt: AsyncBcrypt, openApiClient: OpenApiClient, dao: C
         ))
     }
 
-  def buyStocks(client: VerifiedClient, stockOrder: StockOrder): Task[PlacedMarketOrder] =
-    openApiClient.`/orders/market-order`(client.token, stockOrder)
+  def buyStocks(client: VerifiedClient, order: StockOrder): Task[PlacedMarketOrder] =
+    openApiClient.`/orders/market-order`(client.token, order.figi, MarketOrderRequest(order.lots, "Buy"))
       .map(response => response.payload)
       .onErrorFallbackTo(Task.raiseError(NotEnoughBalance())) <*
-        dao.registerStock(client.id, stockOrder)
+        dao.registerStock(client.id, order)
 
   def getAllNotifications(client: VerifiedClient): Task[Notifications] =
     dao.getAllNotificationsAndMarkThemSent(client.id) map { seq =>

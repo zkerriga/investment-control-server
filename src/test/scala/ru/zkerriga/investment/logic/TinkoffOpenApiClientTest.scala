@@ -5,8 +5,8 @@ import monix.execution.Scheduler
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AsyncFunSuite
 
-import ru.zkerriga.investment.entities.openapi.Stock
-import ru.zkerriga.investment.entities.{StockOrder, TinkoffToken}
+import ru.zkerriga.investment.entities.openapi.{MarketOrderRequest, Stock}
+import ru.zkerriga.investment.entities.TinkoffToken
 
 
 trait TinkoffOpenApiClientTest extends AsyncFunSuite with BeforeAndAfterAll {
@@ -22,7 +22,7 @@ trait TinkoffOpenApiClientTest extends AsyncFunSuite with BeforeAndAfterAll {
       _ <- api.`/sandbox/register`(validToken)
       stocks <- api.`/market/stocks`(validToken)
       figi = stocks.payload.instruments.collectFirst{ case Stock(figi, _, _, _, _, _, "USD", _) => figi }
-      buyRes <- api.`/orders/market-order`(validToken, StockOrder(figi.getOrElse(""), 1, 10.0, 100.0))
+      buyRes <- api.`/orders/market-order`(validToken, figi.getOrElse(""), MarketOrderRequest(1, "Buy"))
     } yield {
       assert(stocks.payload.total > 0)
       assert(figi.nonEmpty)

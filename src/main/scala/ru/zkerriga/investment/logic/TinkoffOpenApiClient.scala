@@ -37,12 +37,12 @@ class TinkoffOpenApiClient(implicit as: ActorSystem, s: Scheduler) extends OpenA
   override def `/market/stocks`(token: TinkoffToken): Task[TinkoffResponse[Stocks]] =
     request[TinkoffResponse[Stocks]](GET, "/market/stocks", token)
 
-  def `/orders/market-order`(token: TinkoffToken, stockOrder: StockOrder): Task[TinkoffResponse[PlacedMarketOrder]] =
+  def `/orders/market-order`(token: TinkoffToken, figi: String, marketOrder: MarketOrderRequest): Task[TinkoffResponse[PlacedMarketOrder]] =
     request[TinkoffResponse[PlacedMarketOrder]](
       POST,
-      s"/orders/market-order?figi=${stockOrder.figi}",
+      s"/orders/market-order?figi=$figi",
       token,
-      jsonRequestEntity(MarketOrderRequest(stockOrder.lots, "Buy"))
+      jsonRequestEntity(marketOrder)
     )
 
   private val link = "https://api-invest.tinkoff.ru/openapi/sandbox"

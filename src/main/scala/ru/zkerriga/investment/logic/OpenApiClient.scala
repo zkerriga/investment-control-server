@@ -2,7 +2,7 @@ package ru.zkerriga.investment.logic
 
 import monix.eval.Task
 
-import ru.zkerriga.investment.entities.{StockOrder, TinkoffToken}
+import ru.zkerriga.investment.entities.TinkoffToken
 import ru.zkerriga.investment.entities.openapi._
 
 
@@ -15,5 +15,5 @@ trait OpenApiClient {
 
   def `/market/stocks`(token: TinkoffToken): Task[TinkoffResponse[Stocks]]
 
-  def `/orders/market-order`(token: TinkoffToken, stockOrder: StockOrder): Task[TinkoffResponse[PlacedMarketOrder]]
+  def `/orders/market-order`(token: TinkoffToken, figi: String, marketOrder: MarketOrderRequest): Task[TinkoffResponse[PlacedMarketOrder]]
 }
