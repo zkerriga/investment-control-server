@@ -38,18 +38,23 @@ object ServerDatabase extends ClientsDao with MonitoringDao {
     run(TrackStocksQueryRepository.addTrackStock(clientId, order))
 
   def getAllNotificationsAndMarkThemSent(clientId: Long): Task[Seq[(Notification, TrackStock)]] =
-    Task.deferFutureAction { implicit scheduler =>
+    setupFuture *> Task.deferFutureAction { implicit scheduler =>
       db.run(
-        (for {
+        for {
           seq <- NotificationsQueryRepository.getAllUnsentNotificationsWithTrackStock(clientId)
           _ <- NotificationsQueryRepository.markNotificationsAsSent(clientId)
-        } yield seq).transactionally
+        } yield seq
       )
     }
 
-  def getAllTrackedStocks: Task[Map[ServerDatabase.FIGI, TrackStock]] = ???
+  def getAllTrackedStocks: Task[Map[FIGI, Seq[TrackStock]]] =
+    run(TrackStocksQueryRepository.getAllTrackedStocks) map (_.groupBy(_.figi))
 
-  def markStocksUntracked(stocks: Seq[TrackStock]): Task[Unit] = ???
+  def markStocksUntracked(stockIds: Seq[Long]): Task[Unit] = {
+    lazy val querySeq = stockIds.map(id => TrackStocksQueryRepository.markStockUntracked(id))
+    run(DIO.sequence(querySeq)) flatMap (_ => Task.unit)
+  }
 
-  def addNotifications(notifications: Seq[Notification]): Task[Unit] = ???
+  def addNotifications(notifications: Seq[Notification]): Task[Unit] =
+    run(NotificationsQueryRepository.addNotifications(notifications)) flatMap (_ => Task.unit)
 }

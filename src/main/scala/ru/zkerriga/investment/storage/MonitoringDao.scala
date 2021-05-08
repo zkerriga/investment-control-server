@@ -8,9 +8,9 @@ import ru.zkerriga.investment.storage.entities.{Notification, TrackStock}
 trait MonitoringDao {
   type FIGI = String
 
-  def getAllTrackedStocks: Task[Map[FIGI, TrackStock]]
+  def getAllTrackedStocks: Task[Map[FIGI, Seq[TrackStock]]]
 
-  def markStocksUntracked(stocks: Seq[TrackStock]): Task[Unit]
+  def markStocksUntracked(stockIds: Seq[Long]): Task[Unit]
 
   def addNotifications(notifications: Seq[Notification]): Task[Unit]
 }
