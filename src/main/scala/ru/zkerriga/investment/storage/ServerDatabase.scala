@@ -47,8 +47,8 @@ object ServerDatabase extends ClientsDao with MonitoringDao {
       )
     }
 
-  def getAllTrackedStocks: Task[Map[FIGI, Seq[TrackStock]]] =
-    run(TrackStocksQueryRepository.getAllTrackedStocks) map (_.groupBy(_.figi))
+  def getAllTrackedStocks: Task[Seq[TrackStock]] =
+    run(TrackStocksQueryRepository.getAllTrackedStocks)
 
   def markStocksUntracked(stockIds: Seq[Long]): Task[Unit] = {
     lazy val querySeq = stockIds.map(id => TrackStocksQueryRepository.markStockUntracked(id))
