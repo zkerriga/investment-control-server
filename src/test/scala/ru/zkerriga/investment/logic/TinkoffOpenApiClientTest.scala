@@ -23,10 +23,12 @@ trait TinkoffOpenApiClientTest extends AsyncFunSuite with BeforeAndAfterAll {
       stocks <- api.`/market/stocks`(validToken)
       figi = stocks.payload.instruments.collectFirst{ case Stock(figi, _, _, _, _, _, "USD", _) => figi }
       buyRes <- api.`/orders/market-order`(validToken, figi.getOrElse(""), MarketOrderRequest(1, "Buy"))
+      orderBook <- api.`/market/orderbook`(validToken, figi.getOrElse(""))
     } yield {
       assert(stocks.payload.total > 0)
       assert(figi.nonEmpty)
       assert(buyRes.payload.status === "Fill")
+      assert(orderBook.payload.depth === 20)
     }).runToFuture
   }
 

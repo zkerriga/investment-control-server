@@ -16,4 +16,6 @@ trait OpenApiClient {
   def `/market/stocks`(token: TinkoffToken): Task[TinkoffResponse[Stocks]]
 
   def `/orders/market-order`(token: TinkoffToken, figi: String, marketOrder: MarketOrderRequest): Task[TinkoffResponse[PlacedMarketOrder]]
+
+  def `/market/orderbook`(token: TinkoffToken, figi: String): Task[TinkoffResponse[OrderBook]]
 }

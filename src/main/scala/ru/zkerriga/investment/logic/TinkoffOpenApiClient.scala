@@ -22,7 +22,7 @@ class TinkoffOpenApiClient(implicit as: ActorSystem, s: Scheduler) extends OpenA
 
   private lazy val startBalance = SandboxSetCurrencyBalanceRequest("USD", 1000.0)
 
-  override def `/sandbox/register`(token: TinkoffToken): Task[TinkoffResponse[Empty]] =
+  def `/sandbox/register`(token: TinkoffToken): Task[TinkoffResponse[Empty]] =
     request[TinkoffResponse[Empty]](POST, "/sandbox/register", token) <*
       `/sandbox/currencies/balance`(token, startBalance)
 
@@ -34,7 +34,7 @@ class TinkoffOpenApiClient(implicit as: ActorSystem, s: Scheduler) extends OpenA
       jsonRequestEntity(balance)
     )
 
-  override def `/market/stocks`(token: TinkoffToken): Task[TinkoffResponse[Stocks]] =
+  def `/market/stocks`(token: TinkoffToken): Task[TinkoffResponse[Stocks]] =
     request[TinkoffResponse[Stocks]](GET, "/market/stocks", token)
 
   def `/orders/market-order`(token: TinkoffToken, figi: String, marketOrder: MarketOrderRequest): Task[TinkoffResponse[PlacedMarketOrder]] =
@@ -44,6 +44,9 @@ class TinkoffOpenApiClient(implicit as: ActorSystem, s: Scheduler) extends OpenA
       token,
       jsonRequestEntity(marketOrder)
     )
+
+  def `/market/orderbook`(token: TinkoffToken, figi: String): Task[TinkoffResponse[OrderBook]] =
+    request[TinkoffResponse[OrderBook]](GET, s"/market/orderbook?figi=$figi&depth=20", token)
 
   private val link = "https://api-invest.tinkoff.ru/openapi/sandbox"
 
