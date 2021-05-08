@@ -36,7 +36,9 @@ class StocksMonitoring(openApiClient: OpenApiClient, dao: MonitoringDao, token: 
         stock.figi,
         MarketOrderRequest(stock.lots, "Sell")
       )
-    } *> Task.unit
+    } *> dao.markStocksUntracked(
+      stocks.collect { case stock if stock.id.isDefined => stock.id.getOrElse(0) }
+    )
 
   private def createNotifications(stocks: Seq[TrackStock]): Task[Unit] = Task(
     stocks collect {
