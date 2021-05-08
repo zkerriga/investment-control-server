@@ -23,7 +23,7 @@ object Main {
 
   private def terminateSystem: Task[Terminated] = Task.fromFuture(as.terminate())
 
-  def createServiceApi(dao: Dao): ServiceLogic = {
+  def createServiceApi(dao: ClientsDao): ServiceLogic = {
     val tinkoffOpenApiClient: OpenApiClient = new TinkoffOpenApiClient
     val encryption: AsyncBcrypt = new AsyncBcryptImpl
     new ServiceLogicImpl(encryption, tinkoffOpenApiClient, dao)
@@ -43,7 +43,7 @@ object Main {
   }
 
   def main(args: Array[String]): Unit = {
-    val dao: Dao                    = ServerDatabase
+    val dao: ServerDatabase.type    = ServerDatabase
     val service: ServiceLogic       = createServiceApi(dao)
     val serverRoutes: ServerRoutes  = createServerRoutes(service)
     val server                      = Server(serverRoutes)

@@ -7,7 +7,7 @@ import ru.zkerriga.investment.entities.StockOrder
 import ru.zkerriga.investment.storage.entities.{Client, Notification, TrackStock}
 
 
-object ServerDatabase extends Dao {
+object ServerDatabase extends ClientsDao {
   private val clients = ClientsQueryRepository.AllClients
   private val trackStocks = TrackStocksQueryRepository.AllTrackStocks
   private val notifications = NotificationsQueryRepository.AllNotifications
@@ -31,8 +31,8 @@ object ServerDatabase extends Dao {
   def findClientByUsername(username: String): Task[Option[Client]] =
     run(ClientsQueryRepository.findByLogin(username))
 
-  def updateClientToken(clientId: Long, token: String): Task[Int] =
-    run(ClientsQueryRepository.updateToken(clientId, token))
+  def updateClientToken(clientId: Long, token: String): Task[Unit] =
+    run(ClientsQueryRepository.updateToken(clientId, token)) flatMap (_ => Task.unit)
 
   def registerStock(clientId: Long, order: StockOrder): Task[Long] =
     run(TrackStocksQueryRepository.addTrackStock(clientId, order))

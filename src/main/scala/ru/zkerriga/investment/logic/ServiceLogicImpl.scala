@@ -6,12 +6,12 @@ import sttp.tapir.model.UsernamePassword
 
 import ru.zkerriga.investment.entities.openapi.{PlacedMarketOrder, Stocks, TinkoffResponse}
 import ru.zkerriga.investment.entities.{Login, NotificationMessage, Notifications, StockOrder, TinkoffToken, VerifiedClient}
-import ru.zkerriga.investment.storage.Dao
+import ru.zkerriga.investment.storage.ClientsDao
 import ru.zkerriga.investment.storage.entities.{Client, Notification, TrackStock}
 import ru.zkerriga.investment._
 
 
-class ServiceLogicImpl(bcrypt: AsyncBcrypt, openApiClient: OpenApiClient, dao: Dao) extends ServiceLogic {
+class ServiceLogicImpl(bcrypt: AsyncBcrypt, openApiClient: OpenApiClient, dao: ClientsDao) extends ServiceLogic {
 
   def registerClient(login: Login): Task[String] =
     bcrypt.hash(login.password) flatMap { hash =>

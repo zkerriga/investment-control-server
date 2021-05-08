@@ -6,12 +6,7 @@ import ru.zkerriga.investment.entities.StockOrder
 import ru.zkerriga.investment.storage.entities.{Client, Notification, TrackStock}
 
 
-trait Dao {
-  /**
-   * Close the connection to the database
-   */
-  def close(): Task[Unit]
-
+trait ClientsDao {
   /**
    * Adding a client to the Clients table
    * @param username a client's username
@@ -30,7 +25,7 @@ trait Dao {
    * Updates the token of an existing client
    * @param clientId id of an existing(!) client from the database
    */
-  def updateClientToken(clientId: Long, token: String): Task[Int]
+  def updateClientToken(clientId: Long, token: String): Task[Unit]
 
   /**
    * Adds information about the purchased asset to the database for further tracking
