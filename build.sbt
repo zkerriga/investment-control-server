@@ -48,6 +48,9 @@ libraryDependencies ++= Seq(
   // config
   "com.github.pureconfig" %% "pureconfig" % "0.15.0",
 
+  "org.flywaydb" % "flyway-core" % "6.2.1",
+  "org.postgresql" % "postgresql" % "9.4-1206-jdbc42", //org.postgresql.ds.PGSimpleDataSource dependency
+
   "org.scalatest" %% "scalatest" % "3.2.2" % Test,
   "org.scalamock" %% "scalamock" % "4.4.0" % Test,
   "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion % Test,

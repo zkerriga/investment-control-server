@@ -10,9 +10,10 @@ case class ServerConf(
 
 case class DatabaseConf(
   url: String,
+  user: String,
+  password: String,
   driver: String,
-  connectionPool: String,
-  keepAliveConnection: Boolean,
+  maxThreadPool: Option[Int],
 )
 
 case class TinkoffConf(url: String, token: String)

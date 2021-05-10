@@ -73,7 +73,8 @@ object Main {
 
   def main(args: Array[String]): Unit = {
     val program: Task[Unit] = for {
-      config <- getConfiguration
+      config  <- getConfiguration
+      _       <- Migration.migrate(config.database)
       dao   <- Task(ServerDatabase)
       api   <- createOpenApiClient
       _     <- Task.race(initServer(dao, api), initMonitor(dao, api, TinkoffToken(config.tinkoff.token)))

@@ -54,12 +54,10 @@ class StocksMonitoring(openApiClient: OpenApiClient, dao: MonitoringDao, token: 
 
     _ <- Task.now(logger.info({
       val sold = stocksForSale.size
-      s"""Monitoring Cycle =>
-         |Supported now: ${trackedStocks.size - sold}
-         |Sold now: $sold""".stripMargin
+      s"""Supported: ${trackedStocks.size - sold}, Sold: $sold"""
     }))
-    result <- Task.defer(loop.delayExecution(5.second))
+    result <- Task.defer(loop.delayExecution(10.seconds))
   } yield result
 
-  def start: Task[Unit] = loop
+  def start: Task[Unit] = loop.delayExecution(5.seconds)
 }
