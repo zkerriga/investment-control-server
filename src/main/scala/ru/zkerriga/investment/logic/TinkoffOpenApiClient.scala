@@ -14,7 +14,7 @@ import ru.zkerriga.investment.entities.{StockOrder, TinkoffToken}
 import ru.zkerriga.investment.entities.openapi._
 
 
-class TinkoffOpenApiClient(implicit as: ActorSystem, s: Scheduler) extends OpenApiClient {
+class TinkoffOpenApiClient(implicit as: ActorSystem) extends OpenApiClient {
 
   import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
   import io.circe.generic.auto._
@@ -62,7 +62,8 @@ class TinkoffOpenApiClient(implicit as: ActorSystem, s: Scheduler) extends OpenA
       method: HttpMethod,
       path: String,
       token: TinkoffToken,
-      entity: RequestEntity = HttpEntity.Empty): Task[U] = Task.fromFuture{
+      entity: RequestEntity = HttpEntity.Empty
+    ): Task[U] = Task.deferFutureAction { implicit scheduler =>
 
     Http().singleRequest(
       HttpRequest(
