@@ -15,7 +15,7 @@ import ru.zkerriga.investment.storage._
 
 object Main {
   implicit val as: ActorSystem = ActorSystem()
-  implicit val s: Scheduler = monix.execution.Scheduler.global
+  implicit val s: Scheduler = Scheduler(as.dispatcher)
 
   lazy val baseUrl: Uri = Uri(
     scheme = "http",
