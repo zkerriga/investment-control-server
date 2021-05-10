@@ -4,6 +4,8 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.model.Uri
 import monix.eval.Task
 import monix.execution.Scheduler
+import pureconfig.ConfigSource
+import pureconfig.error.ConfigReaderFailures
 
 import ru.zkerriga.investment.logging.Console
 import ru.zkerriga.investment.logic._
@@ -11,7 +13,7 @@ import ru.zkerriga.investment.api._
 import ru.zkerriga.investment.api.endpoints._
 import ru.zkerriga.investment.entities.TinkoffToken
 import ru.zkerriga.investment.storage._
-
+import ru.zkerriga.investment.configuration.Configuration
 
 object Main {
   implicit val as: ActorSystem = ActorSystem()
@@ -60,12 +62,21 @@ object Main {
   def createOpenApiClient: Task[OpenApiClient] =
     Task(new TinkoffOpenApiClient)
 
+  def getConfiguration: Task[Configuration] = {
+    import pureconfig.generic.auto._
+    val configSource = ConfigSource.default.load[Configuration]
+
+    Task.fromEither(
+      (err: ConfigReaderFailures) => new RuntimeException(s"Invalid configuration: $err")
+    )(configSource)
+  }
+
   def main(args: Array[String]): Unit = {
     val program: Task[Unit] = for {
-      token <- TokenForServer.token
+      config <- getConfiguration
       dao   <- Task(ServerDatabase)
       api   <- createOpenApiClient
-      _     <- Task.race(initServer(dao, api), initMonitor(dao, api, token))
+      _     <- Task.race(initServer(dao, api), initMonitor(dao, api, TinkoffToken(config.tinkoff.token)))
       _     <- dao.close()
     } yield ()
 
