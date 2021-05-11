@@ -9,20 +9,20 @@ import scala.concurrent.Future
 import ru.zkerriga.investment.api.documentation.RegisterEndpoint
 import ru.zkerriga.investment.api.{ExceptionHandler, ExceptionResponse}
 import ru.zkerriga.investment.entities.TinkoffToken
-import ru.zkerriga.investment.logic.ServiceLogic
+import ru.zkerriga.investment.logic.{RegisterLogic, VerifyLogic}
 import ru.zkerriga.investment.storage.entities.Client
 
 
-class RegisterServerEndpoint(serviceApi: ServiceLogic, exceptionHandler: ExceptionHandler[Task])(implicit s: Scheduler)
+class RegisterServerEndpoint(registerLogic: RegisterLogic, verifyLogic: VerifyLogic, exceptionHandler: ExceptionHandler[Task])(implicit s: Scheduler)
   extends Endpoints[Future] {
 
   private def authorizeWithoutToken(credentials: UsernamePassword): Future[Either[ExceptionResponse, Client]] =
-    exceptionHandler.handle(serviceApi.verifyCredentials(credentials)).runToFuture
+    exceptionHandler.handle(verifyLogic.verifyCredentials(credentials)).runToFuture
 
   private val register =
     RegisterEndpoint.register
       .serverLogic[Future] { login =>
-        exceptionHandler.handle(serviceApi.registerClient(login)).runToFuture
+        exceptionHandler.handle(registerLogic.registerClient(login)).runToFuture
       }
 
   private val updateToken =
@@ -30,7 +30,7 @@ class RegisterServerEndpoint(serviceApi: ServiceLogic, exceptionHandler: Excepti
       .serverLogicPart(authorizeWithoutToken)
       .andThen {
         case (client: Client, token: TinkoffToken) =>
-          exceptionHandler.handle(serviceApi.updateToken(client, token)).runToFuture
+          exceptionHandler.handle(registerLogic.updateToken(client, token)).runToFuture
       }
 
   override def endpoints: List[ServerEndpoint[_, ExceptionResponse, String, Any, Future]] =

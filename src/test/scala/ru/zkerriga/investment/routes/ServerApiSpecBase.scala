@@ -14,7 +14,7 @@ import ru.zkerriga.investment.api.ExceptionResponse
 import ru.zkerriga.investment.base.ServerConfiguration
 import ru.zkerriga.investment.entities.openapi._
 import ru.zkerriga.investment.entities._
-import ru.zkerriga.investment.logic.ServiceLogic
+import ru.zkerriga.investment.logic.{MarketLogic, NotificationLogic, RegisterLogic, VerifyLogic}
 import ru.zkerriga.investment.storage.entities.Client
 
 
@@ -54,7 +54,7 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
 
   describe(s"POST $link/register") {
     it("register a new client") {
-      (mockServiceApi.registerClient _)
+      (mockRegisterLogic.registerClient _)
         .expects(testLogin)
         .returns(Task.now(testUsername))
 
@@ -64,7 +64,7 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
       }
     }
     it("register an existed client") {
-      (mockServiceApi.registerClient _)
+      (mockRegisterLogic.registerClient _)
         .expects(testLogin)
         .returns(Task.raiseError(LoginAlreadyExist(testUsername)))
 
@@ -85,7 +85,7 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
       }
     }
     it("invalid authentication") {
-      (mockServiceApi.verifyCredentials _)
+      (mockVerifyLogic.verifyCredentials _)
         .expects(testUsernamePassword)
         .returns(Task.raiseError[Client](IncorrectCredentials()))
 
@@ -96,10 +96,10 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
     }
     it("valid credentials") {
       val token = TinkoffToken("valid token")
-      (mockServiceApi.verifyCredentials _)
+      (mockVerifyLogic.verifyCredentials _)
         .expects(testUsernamePassword)
         .returns(Task.now(testClient))
-      (mockServiceApi.updateToken _)
+      (mockRegisterLogic.updateToken _)
         .expects(testClient, token)
         .returns(Task.now(testUsername))
 
@@ -110,10 +110,10 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
     }
     it("valid credentials with invalid token") {
       val token = TinkoffToken("invalid token")
-      (mockServiceApi.verifyCredentials _)
+      (mockVerifyLogic.verifyCredentials _)
         .expects(testUsernamePassword)
         .returns(Task.now(testClient))
-      (mockServiceApi.updateToken _)
+      (mockRegisterLogic.updateToken _)
         .expects(testClient, token)
         .returns(Task.raiseError(InvalidToken()))
 
@@ -125,10 +125,10 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
   }
 
   def mockVerify = {
-    (mockServiceApi.verifyCredentials _)
+    (mockVerifyLogic.verifyCredentials _)
       .expects(testUsernamePassword)
       .returns(Task.now(testClient))
-    (mockServiceApi.verifyToken _)
+    (mockVerifyLogic.verifyToken _)
       .expects(testClient)
       .returns(Task.now(testVerifiedClient))
   }
@@ -140,7 +140,7 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
         Stock("A2B3C4", "BBB", "C4B3A2", None, 1, None, "USD", "Company2"),
       ))
       mockVerify
-      (mockServiceApi.getStocks _)
+      (mockMarketLogic.getStocks _)
         .expects(testVerifiedClient, 1, 2)
         .returns(Task.now(stocks))
 
@@ -151,7 +151,7 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
     }
     it("incorrect page") {
       mockVerify
-      (mockServiceApi.getStocks _)
+      (mockMarketLogic.getStocks _)
         .expects(testVerifiedClient, 1000, 1000)
         .returns(Task.raiseError(PageNotFound()))
 
@@ -165,7 +165,7 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
   describe(s"POST $link/orders/market-order/buy") {
     it("not enough balance") {
       mockVerify
-      (mockServiceApi.buyStocks _)
+      (mockMarketLogic.buyStocks _)
         .expects(testVerifiedClient, testStockOrder)
         .returns(Task.raiseError[PlacedMarketOrder](NotEnoughBalance()))
 
@@ -176,7 +176,7 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
     }
     it("successful buy") {
       mockVerify
-      (mockServiceApi.buyStocks _)
+      (mockMarketLogic.buyStocks _)
         .expects(testVerifiedClient, testStockOrder)
         .returns(Task.now(testOrderResponse))
 
@@ -190,7 +190,7 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
   describe(s"GET $link/notifications/all") {
     it("should return notifications") {
       mockVerify
-      (mockServiceApi.getAllNotifications _)
+      (mockNotificationLogic.getAllNotifications _)
         .expects(testVerifiedClient)
         .returns(Task.now(testNotifications))
 
@@ -201,5 +201,8 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
     }
   }
 
-  protected val mockServiceApi: ServiceLogic = mock[ServiceLogic]
+  protected val mockRegisterLogic: RegisterLogic = mock[RegisterLogic]
+  protected val mockVerifyLogic: VerifyLogic = mock[VerifyLogic]
+  protected val mockMarketLogic: MarketLogic = mock[MarketLogic]
+  protected val mockNotificationLogic: NotificationLogic = mock[NotificationLogic]
 }

@@ -1,5 +1,8 @@
 package ru.zkerriga.investment.configuration
 
+import ru.zkerriga.investment.entities.openapi.SandboxSetCurrencyBalanceRequest
+
+
 case class Port(number: Int) extends AnyVal
 
 case class ServerConf(
@@ -7,6 +10,11 @@ case class ServerConf(
   port: Port,
   useHttps: Boolean,
 )
+
+object ServerConf {
+  def getUri(c: ServerConf): String =
+    s"http${if (c.useHttps) "s" else ""}://${c.host}:${c.port.number}"
+}
 
 case class DatabaseConf(
   url: String,
@@ -16,7 +24,11 @@ case class DatabaseConf(
   maxThreadPool: Option[Int],
 )
 
-case class TinkoffConf(url: String, token: String)
+case class TinkoffConf(
+  url: String,
+  startBalance: SandboxSetCurrencyBalanceRequest,
+  token: String,
+)
 
 case class Configuration(
   server: ServerConf,

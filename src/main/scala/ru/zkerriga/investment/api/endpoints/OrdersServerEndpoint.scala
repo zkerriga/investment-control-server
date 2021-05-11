@@ -6,20 +6,20 @@ import sttp.tapir.server.ServerEndpoint
 import scala.concurrent.Future
 
 import ru.zkerriga.investment.api.{ExceptionHandler, ExceptionResponse}
-import ru.zkerriga.investment.logic.ServiceLogic
+import ru.zkerriga.investment.logic.{MarketLogic, VerifyLogic}
 import ru.zkerriga.investment.api.documentation.OrdersEndpoint
 import ru.zkerriga.investment.entities.openapi.PlacedMarketOrder
 
 
-class OrdersServerEndpoint(serviceLogic: ServiceLogic, exceptionHandler: ExceptionHandler[Task])(implicit s: Scheduler)
+class OrdersServerEndpoint(verifyLogic: VerifyLogic, marketLogic: MarketLogic, exceptionHandler: ExceptionHandler[Task])(implicit s: Scheduler)
   extends Endpoints[Future] with Authentication {
 
   private val buyStocks =
     OrdersEndpoint.marketOrder
-      .serverLogicPart(authorizeF(serviceLogic, exceptionHandler))
+      .serverLogicPart(authorizeF(verifyLogic, exceptionHandler))
       .andThen {
         case (client, stockOrder) => exceptionHandler.handle(
-          serviceLogic.buyStocks(client, stockOrder)
+          marketLogic.buyStocks(client, stockOrder)
         ).runToFuture
       }
 

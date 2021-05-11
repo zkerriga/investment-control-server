@@ -12,9 +12,10 @@ import sttp.tapir.swagger.akkahttp.SwaggerAkka
 import scala.concurrent.Future
 
 import ru.zkerriga.investment.api.endpoints.Endpoints
+import ru.zkerriga.investment.configuration.ServerConf
 
 
-class ServerRoutesImpl(endpoints: List[Endpoints[Future]], baseUrl: Uri) extends ServerRoutes {
+class ServerRoutesImpl(endpoints: List[Endpoints[Future]], config: ServerConf) extends ServerRoutes {
 
   import akka.http.scaladsl.server.RouteConcatenation._
 
@@ -39,7 +40,7 @@ class ServerRoutesImpl(endpoints: List[Endpoints[Future]], baseUrl: Uri) extends
   private val swagger = new SwaggerAkka(openapi.toYaml, contextPath, yamlName).routes
 
   private val redirectToDocs: Route =
-    redirect(baseUrl.withPath(Uri.Path("/" ++ contextPath)), StatusCodes.PermanentRedirect)
+    redirect(s"${ServerConf.getUri(config)}/$contextPath", StatusCodes.PermanentRedirect)
 
   override def routes: Route =
     AkkaHttpServerInterpreter.toRoute(allEndpoints) ~ swagger ~ redirectToDocs
