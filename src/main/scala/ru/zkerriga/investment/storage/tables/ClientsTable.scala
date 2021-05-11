@@ -6,12 +6,12 @@ import slick.lifted.ProvenShape
 import ru.zkerriga.investment.storage.entities.Client
 
 
-class ClientsTable(tag: Tag) extends Table[Client](tag, "CLIENTS") {
-  def id: Rep[Long] = column("ID", O.PrimaryKey, O.AutoInc)
-  def login: Rep[String] = column("LOGIN", O.Unique)
-  def passwordHash: Rep[String] = column("PASSWORD_HASH")
-  def token: Rep[Option[String]] = column("TOKEN")
-  def active: Rep[Boolean] = column("ACTIVE")
+class ClientsTable(tag: Tag) extends Table[Client](tag, "clients") {
+  def id: Rep[Long] = column("id", O.PrimaryKey, O.AutoInc)
+  def login: Rep[String] = column("login", O.Unique)
+  def passwordHash: Rep[String] = column("password_hash")
+  def token: Rep[Option[String]] = column("token")
+  def active: Rep[Boolean] = column("active")
 
   override def * : ProvenShape[Client] = (id.?, login, passwordHash, token, active).mapTo[Client]
 }

@@ -7,18 +7,12 @@ import ru.zkerriga.investment.storage.queries.{ClientsQueryRepository, TrackStoc
 import ru.zkerriga.investment.storage.entities.{Client, Notification, TrackStock}
 
 
-class NotificationsTable(tag: Tag) extends Table[Notification](tag, "NOTIFICATIONS") {
-  def id: Rep[Long] = column("ID", O.PrimaryKey, O.AutoInc)
-  def clientId: Rep[Long] = column("CLIENT_ID")
-  def trackStockId: Rep[Long] = column("TRACK_STOCK_ID")
-  def sold: Rep[Boolean] = column("SOLD")
-  def sent: Rep[Boolean] = column("SENT")
-
-  /* todo: change it with flyway */
-  def client: ForeignKeyQuery[ClientsTable, Client] =
-    foreignKey("CLIENT_FOR_NOTIFICATION_FK", clientId, ClientsQueryRepository.AllClients)(_.id)
-  def trackStock: ForeignKeyQuery[TrackStocksTable, TrackStock] =
-    foreignKey("TRACK_STOCK_FK", trackStockId, TrackStocksQueryRepository.AllTrackStocks)(_.id)
+class NotificationsTable(tag: Tag) extends Table[Notification](tag, "notifications") {
+  def id: Rep[Long] = column("id", O.PrimaryKey, O.AutoInc)
+  def clientId: Rep[Long] = column("client_id")
+  def trackStockId: Rep[Long] = column("track_stock_id")
+  def sold: Rep[Boolean] = column("sold")
+  def sent: Rep[Boolean] = column("sent")
 
   override def * : ProvenShape[Notification] = (id.?, clientId, trackStockId, sold, sent).mapTo[Notification]
 }
