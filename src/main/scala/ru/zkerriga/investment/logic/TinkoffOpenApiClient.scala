@@ -13,7 +13,7 @@ import ru.zkerriga.investment.entities.TinkoffToken
 import ru.zkerriga.investment.entities.openapi._
 
 
-class TinkoffOpenApiClient(uri: Uri, startBalance: SandboxSetCurrencyBalanceRequest)
+class TinkoffOpenApiClient(uri: String, startBalance: SandboxSetCurrencyBalanceRequest)
                           (implicit as: ActorSystem) extends OpenApiClient {
 
   import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -60,7 +60,7 @@ class TinkoffOpenApiClient(uri: Uri, startBalance: SandboxSetCurrencyBalanceRequ
       HttpRequest(
         method = method,
         entity = entity,
-        uri = uri.withPath(Uri.Path(path))
+        uri = s"$uri$path"
       ).addCredentials(HttpCredentials.createOAuth2BearerToken(token.token))
     ).flatMap { response => Unmarshal(response).to[U] }
   }

@@ -1,9 +1,9 @@
-CREATE TABLE IF NOT EXISTS track_stocks (
-    id serial PRIMARY KEY,
-    client_id integer NOT NULL,
-    figi text NOT NULL,
-    lots integer NOT NULL,
-    stop_loss double precision NOT NULL,
-    take_profit double precision NOT NULL,
-    active boolean NOT NULL
+CREATE TABLE IF NOT EXISTS "TRACK_STOCKS" (
+    "ID" serial PRIMARY KEY,
+    "CLIENT_ID" integer NOT NULL,
+    "FIGI" text NOT NULL,
+    "LOTS" integer NOT NULL,
+    "STOP_LOSS" double precision NOT NULL,
+    "TAKE_PROFIT" double precision NOT NULL,
+    "ACTIVE" boolean NOT NULL
 );

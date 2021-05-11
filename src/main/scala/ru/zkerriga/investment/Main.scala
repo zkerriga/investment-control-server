@@ -67,7 +67,7 @@ object Main {
   }
 
   def createOpenApiClient(config: TinkoffConf): Task[OpenApiClient] =
-    Task(new TinkoffOpenApiClient(Uri(config.url), config.startBalance))
+    Task(new TinkoffOpenApiClient(config.url, config.startBalance))
 
   def getConfiguration: Task[Configuration] = {
     import pureconfig.generic.auto._
