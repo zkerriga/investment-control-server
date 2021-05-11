@@ -5,12 +5,13 @@ import akka.http.scaladsl.Http
 import monix.execution.Scheduler
 import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
 import pureconfig.ConfigSource
-import slick.jdbc.JdbcBackend.Database
+import pureconfig.generic.auto._
+import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
 
 import ru.zkerriga.investment.storage.Migration
-import ru.zkerriga.investment.configuration.{DatabaseConf, Port, ServerConf, TinkoffConf}
+import ru.zkerriga.investment.configuration.{Configuration, DatabaseConf, Port, ServerConf}
 import ru.zkerriga.investment.logic.TinkoffOpenApiClient
 import ru.zkerriga.investment.{Main, Server}
 import ru.zkerriga.investment.entities.TinkoffToken
@@ -23,36 +24,38 @@ class ServerSpec extends ServerISpecBase {
 
   override protected def beforeAll(): Unit = {
     Await.result(server, Duration.Inf)
-    ()
   }
 
   override protected def afterAll(): Unit = {
     Await.result(
-      server.flatMap(_.terminate(10.seconds))
-        .flatMap(_ => as.terminate()),
+      server
+        .flatMap(_.terminate(10.seconds))
+        .flatMap(_ => as.terminate())
+        .flatMap(_ => Future(db.close())),
       Duration.Inf
     )
-    ()
   }
 
-  private val configuration = Main.getConfiguration.memoize
+  private val databaseConf = DatabaseConf(
+    url = s"jdbc:postgresql://localhost:5432/investment_test",
+    user = "postgres",
+    password = "postgres",
+    driver = "org.postgresql.Driver",
+    maxThreadPool = None
+  )
+  private val serverConf = ServerConf(host = "localhost", port = Port(8080), useHttps = false)
 
-  private val server: Future[Http.ServerBinding] = {
-    val databaseConf = DatabaseConf(
-      url = s"jdbc:h2:mem:${java.util.UUID.randomUUID()}",
-      user = "",
-      password = "",
-      driver = "org.h2.Driver",
-      maxThreadPool = None
-    )
-    val serverConf = ServerConf(host = "0.0.0.0", port = Port(8080), useHttps = false)
+  private val db = Database.forURL(
+    url = databaseConf.url,
+    user = databaseConf.user,
+    password = databaseConf.password,
+    driver = databaseConf.driver,
+    keepAliveConnection = true
+  )
 
-    val db = Database.forURL(
-      url = databaseConf.url,
-      driver = databaseConf.driver,
-      keepAliveConnection = true
-    )
+  private val configuration = Main.getConfiguration
 
+  private def server: Future[Http.ServerBinding] = {
     (configuration <* Migration.migrate(databaseConf)).runToFuture flatMap { config =>
       Server(
         Main.createServerRoutes(
@@ -62,7 +65,8 @@ class ServerSpec extends ServerISpecBase {
     }
   }
 
-  import pureconfig.generic.auto._
-  override def validToken: TinkoffToken =
-    TinkoffToken(ConfigSource.default.load[TinkoffConf].map(_.token).getOrElse(""))
+  override val validToken: TinkoffToken =
+    TinkoffToken(ConfigSource.default.load[Configuration]
+      .map(_.tinkoff.token).getOrElse(""))
+
 }
