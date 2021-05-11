@@ -6,6 +6,8 @@ import monix.eval.Task
 import monix.execution.Scheduler
 import pureconfig.ConfigSource
 import pureconfig.error.ConfigReaderFailures
+import slick.jdbc.PostgresProfile.api._
+import scala.concurrent.Future
 
 import ru.zkerriga.investment.logging.Console
 import ru.zkerriga.investment.logic._
@@ -13,54 +15,59 @@ import ru.zkerriga.investment.api._
 import ru.zkerriga.investment.api.endpoints._
 import ru.zkerriga.investment.entities.TinkoffToken
 import ru.zkerriga.investment.storage._
-import ru.zkerriga.investment.configuration.Configuration
+import ru.zkerriga.investment.configuration.{Configuration, DatabaseConf, ServerConf, TinkoffConf}
+
 
 object Main {
   implicit val as: ActorSystem = ActorSystem()
   implicit val s: Scheduler = Scheduler(as.dispatcher)
 
-  lazy val baseUrl: Uri = Uri(
-    scheme = "http",
-    authority = Uri.Authority(host = Uri.Host("localhost"), port = 8080)
-  )
-
   private def terminateSystem: Task[Unit] =
     Task.fromFuture(as.terminate()) *> Task.unit
 
-  def createServerRoutes(service: ServiceLogic): ServerRoutes = {
-    val exceptionHandler: ExceptionHandler[Task] = ExceptionHandlerForTask()
+  def createServerRoutes(runner: QueryRunner[Task], apiClient: OpenApiClient, config: ServerConf): ServerRoutes = {
+    val encryption: AsyncBcrypt               = new AsyncBcryptImpl
+    val exceptionHandler                      = ExceptionHandlerForTask()
+
+    val loginDao: LoginDao                    = new LoginDaoImpl(runner)
+    val clientDao: ClientDao                  = new ClientDaoImpl(runner)
+
+    val registerLogic: RegisterLogic          = new RegisterLogicImpl(loginDao, encryption, apiClient)
+    val marketLogic: MarketLogic              = new MarketLogicImpl(clientDao, apiClient)
+    val verifyLogic: VerifyLogic              = new VerifyLogicImpl(loginDao, encryption)
+    val notificationLogic: NotificationLogic  = new NotificationLogicImpl(clientDao)
+
     new ServerRoutesImpl(
       List(
-        new RegisterServerEndpoint(service, exceptionHandler),
-        new MarketServerEndpoint(service, exceptionHandler),
-        new OrdersServerEndpoint(service, exceptionHandler),
-        new NotificationsServerEndpoint(service, exceptionHandler),
+        new RegisterServerEndpoint(registerLogic, verifyLogic, exceptionHandler),
+        new MarketServerEndpoint(verifyLogic, marketLogic, exceptionHandler),
+        new OrdersServerEndpoint(verifyLogic, marketLogic, exceptionHandler),
+        new NotificationsServerEndpoint(verifyLogic, notificationLogic, exceptionHandler),
       ),
-      baseUrl
+      config
     )
   }
 
-  def initServer(dao: ClientsDao, openApiClient: OpenApiClient): Task[Unit] = {
-    val encryption: AsyncBcrypt     = new AsyncBcryptImpl
-    val serviceLogic: ServiceLogic  = new ServiceLogicImpl(encryption, openApiClient, dao)
-    val serverRoutes: ServerRoutes  = createServerRoutes(serviceLogic)
-    val server                      = Server(serverRoutes)
+  def initServer(queryRunner: QueryRunner[Task], openApiClient: OpenApiClient, config: ServerConf): Task[Unit] = {
+    val serverRoutes: ServerRoutes = createServerRoutes(queryRunner, openApiClient, config)
+    val server = Server(serverRoutes)
 
     for {
-      http <- server.start(baseUrl)
+      http <- server.start(config)
       _ <- Console.putAnyLn("Press ENTER to stop server...")
       _ <- Console.readLine
       _ <- server.stop(http)
     } yield ()
   }
 
-  def initMonitor(dao: MonitoringDao, openApiClient: OpenApiClient, token: TinkoffToken): Task[Unit] = {
+  def initMonitor(queryRunner: QueryRunner[Task], openApiClient: OpenApiClient, token: TinkoffToken): Task[Unit] = {
+    val dao     = new MonitoringDaoImpl(queryRunner)
     val monitor = new StocksMonitoring(openApiClient, dao, token)
     monitor.start
   }
 
-  def createOpenApiClient: Task[OpenApiClient] =
-    Task(new TinkoffOpenApiClient)
+  def createOpenApiClient(config: TinkoffConf): Task[OpenApiClient] =
+    Task(new TinkoffOpenApiClient(Uri(config.url), config.startBalance))
 
   def getConfiguration: Task[Configuration] = {
     import pureconfig.generic.auto._
@@ -71,14 +78,35 @@ object Main {
     )(configSource)
   }
 
+  def createDb(config: DatabaseConf): Task[Database] = Task {
+    Database.forURL(
+      url = config.url,
+      user = config.user,
+      password = config.password,
+      driver = config.driver
+    )
+  }
+
+  def createQueryRunner(db: Database): QueryRunner[Task] = new QueryRunner[Task](db) {
+    override protected def converter[A]: Future[A] => Task[A] =
+      future => Task.deferFutureAction { implicit scheduler => future }
+  }
+
   def main(args: Array[String]): Unit = {
+
+    def logic(config: Configuration, runner: QueryRunner[Task]): Task[Unit] = for {
+      api <- createOpenApiClient(config.tinkoff)
+      _   <- Task.race(
+        initServer(runner, api, config.server),
+        initMonitor(runner, api, TinkoffToken(config.tinkoff.token))
+      )
+    } yield ()
+
     val program: Task[Unit] = for {
       config  <- getConfiguration
       _       <- Migration.migrate(config.database)
-      dao   <- Task(ServerDatabase)
-      api   <- createOpenApiClient
-      _     <- Task.race(initServer(dao, api), initMonitor(dao, api, TinkoffToken(config.tinkoff.token)))
-      _     <- dao.close()
+      db      <- createDb(config.database)
+      _       <- logic(config, createQueryRunner(db)).doOnFinish(_ => Task(db.close()))
     } yield ()
 
     program
