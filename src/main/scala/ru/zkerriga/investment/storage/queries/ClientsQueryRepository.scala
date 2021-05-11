@@ -8,7 +8,7 @@ import ru.zkerriga.investment.storage.entities.Client
 import ru.zkerriga.investment.storage.tables.ClientsTable
 
 
-private[storage] object ClientsQueryRepository {
+object ClientsQueryRepository {
   val AllClients = TableQuery[ClientsTable]
 
   def addClient(login: String, passwordHash: String): DIO[Long, Effect.Write] =

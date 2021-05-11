@@ -9,7 +9,7 @@ import ru.zkerriga.investment.storage.entities.TrackStock
 import ru.zkerriga.investment.storage.tables.TrackStocksTable
 
 
-private[storage] object TrackStocksQueryRepository {
+object TrackStocksQueryRepository {
   val AllTrackStocks = TableQuery[TrackStocksTable]
 
   def addTrackStock(clientId: Long, order: StockOrder): DIO[Long, Effect.Write] =

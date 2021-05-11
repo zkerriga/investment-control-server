@@ -10,7 +10,7 @@ import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
 
-import ru.zkerriga.investment.storage.Migration
+import ru.zkerriga.investment.storage.queries._
 import ru.zkerriga.investment.configuration.{Configuration, DatabaseConf, Port, ServerConf}
 import ru.zkerriga.investment.logic.TinkoffOpenApiClient
 import ru.zkerriga.investment.{Main, Server}
@@ -23,7 +23,7 @@ class ServerSpec extends ServerISpecBase {
   implicit lazy val s: Scheduler = Scheduler(as.dispatcher)
 
   override protected def beforeAll(): Unit = {
-    Await.result(server, Duration.Inf)
+    Await.result(Future(db.run(initSchema)) flatMap (_ => server), Duration.Inf)
   }
 
   override protected def afterAll(): Unit = {
@@ -37,10 +37,10 @@ class ServerSpec extends ServerISpecBase {
   }
 
   private val databaseConf = DatabaseConf(
-    url = s"jdbc:postgresql://localhost:5432/investment_test",
-    user = "postgres",
-    password = "postgres",
-    driver = "org.postgresql.Driver",
+    url = s"jdbc:h2:mem:${java.util.UUID.randomUUID()}",
+    user = "",
+    password = "",
+    driver = "org.h2.Driver",
     maxThreadPool = None
   )
   private val serverConf = ServerConf(host = "localhost", port = Port(8080), useHttps = false)
@@ -53,10 +53,15 @@ class ServerSpec extends ServerISpecBase {
     keepAliveConnection = true
   )
 
+  private val initSchema =
+    (ClientsQueryRepository.AllClients.schema ++
+      TrackStocksQueryRepository.AllTrackStocks.schema ++
+      NotificationsQueryRepository.AllNotifications.schema).create
+
   private val configuration = Main.getConfiguration
 
   private def server: Future[Http.ServerBinding] = {
-    (configuration <* Migration.migrate(databaseConf)).runToFuture flatMap { config =>
+    configuration.runToFuture flatMap { config =>
       Server(
         Main.createServerRoutes(
           Main.createQueryRunner(db),

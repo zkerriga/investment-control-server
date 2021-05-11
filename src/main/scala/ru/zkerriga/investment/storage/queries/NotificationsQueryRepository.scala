@@ -8,7 +8,7 @@ import ru.zkerriga.investment.storage.entities.{Notification, TrackStock}
 import ru.zkerriga.investment.storage.tables.NotificationsTable
 
 
-private[storage] object NotificationsQueryRepository {
+object NotificationsQueryRepository {
   val AllNotifications = TableQuery[NotificationsTable]
 
   def addNotifications(notifications: Seq[Notification]): DIO[Option[Int], Effect.Write] =
