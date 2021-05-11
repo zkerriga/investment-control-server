@@ -1,8 +1,9 @@
-package ru.zkerriga.investment.storage
+package ru.zkerriga.investment.storage.queries
 
 import slick.dbio.Effect
 import slick.jdbc.H2Profile.api._
 
+import ru.zkerriga.investment.storage.DIO
 import ru.zkerriga.investment.storage.entities.{Notification, TrackStock}
 import ru.zkerriga.investment.storage.tables.NotificationsTable
 

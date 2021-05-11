@@ -3,7 +3,7 @@ package ru.zkerriga.investment.storage.tables
 import slick.jdbc.H2Profile.api._
 import slick.lifted.{ForeignKeyQuery, ProvenShape}
 
-import ru.zkerriga.investment.storage.{ClientsQueryRepository, TrackStocksQueryRepository}
+import ru.zkerriga.investment.storage.queries.{ClientsQueryRepository, TrackStocksQueryRepository}
 import ru.zkerriga.investment.storage.entities.{Client, Notification, TrackStock}
 
 

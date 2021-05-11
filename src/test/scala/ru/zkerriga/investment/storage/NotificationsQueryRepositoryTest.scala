@@ -3,7 +3,7 @@ package ru.zkerriga.investment.storage
 import org.scalatest.matchers.should.Matchers
 
 import ru.zkerriga.investment.storage.entities.{Notification, TrackStock}
-import NotificationsQueryRepository._
+import ru.zkerriga.investment.storage.queries.NotificationsQueryRepository._
 
 
 class NotificationsQueryRepositoryTest extends DatabaseSuite with Matchers {

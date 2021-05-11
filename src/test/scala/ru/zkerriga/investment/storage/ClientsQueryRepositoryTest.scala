@@ -1,7 +1,7 @@
 package ru.zkerriga.investment.storage
 
 import org.scalatest.matchers.should.Matchers
-import ClientsQueryRepository._
+import ru.zkerriga.investment.storage.queries.ClientsQueryRepository._
 
 
 class ClientsQueryRepositoryTest extends DatabaseSuite with Matchers {

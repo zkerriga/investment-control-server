@@ -2,7 +2,7 @@ package ru.zkerriga.investment.storage
 
 import org.scalatest.matchers.should.Matchers
 
-import TrackStocksQueryRepository._
+import ru.zkerriga.investment.storage.queries.TrackStocksQueryRepository._
 import ru.zkerriga.investment.entities.StockOrder
 
 

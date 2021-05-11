@@ -3,16 +3,12 @@ package ru.zkerriga.investment.storage
 import org.scalactic.source
 import org.scalatest.compatible
 import org.scalatest.funsuite.AsyncFunSuite
-
-import ClientsQueryRepository.AllClients
-import TrackStocksQueryRepository.AllTrackStocks
-import NotificationsQueryRepository.AllNotifications
-
 import slick.dbio.{DBIOAction, Effect, NoStream}
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.H2Profile.api._
 
 import ru.zkerriga.investment.storage.entities._
+import ru.zkerriga.investment.storage.queries._
 
 
 abstract class DatabaseSuite extends AsyncFunSuite {
@@ -28,9 +24,9 @@ abstract class DatabaseSuite extends AsyncFunSuite {
 
       db.run(
         initSchema
-          .andThen(AllClients.forceInsertAll(sampleClients))
-          .andThen(AllTrackStocks.forceInsertAll(sampleTrackStocks))
-          .andThen(AllNotifications.forceInsertAll(sampleNotifications))
+          .andThen(ClientsQueryRepository.AllClients.forceInsertAll(sampleClients))
+          .andThen(TrackStocksQueryRepository.AllTrackStocks.forceInsertAll(sampleTrackStocks))
+          .andThen(NotificationsQueryRepository.AllNotifications.forceInsertAll(sampleNotifications))
       ).flatMap(_ => db.run(testFun)).andThen { case _ => db.close() }
     }
   }
