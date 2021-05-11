@@ -1,13 +1,8 @@
 package ru.zkerriga.investment
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.model.Uri
 import monix.eval.Task
 import monix.execution.Scheduler
-import pureconfig.ConfigSource
-import pureconfig.error.ConfigReaderFailures
-import slick.jdbc.PostgresProfile.api._
-import scala.concurrent.Future
 
 import ru.zkerriga.investment.logging.Console
 import ru.zkerriga.investment.logic._
@@ -15,7 +10,7 @@ import ru.zkerriga.investment.api._
 import ru.zkerriga.investment.api.endpoints._
 import ru.zkerriga.investment.entities.TinkoffToken
 import ru.zkerriga.investment.storage._
-import ru.zkerriga.investment.configuration.{Configuration, DatabaseConf, ServerConf, TinkoffConf}
+import ru.zkerriga.investment.configuration._
 
 
 object Main {
@@ -69,29 +64,6 @@ object Main {
   def createOpenApiClient(config: TinkoffConf): Task[OpenApiClient] =
     Task(new TinkoffOpenApiClient(config.url, config.startBalance))
 
-  def getConfiguration: Task[Configuration] = {
-    import pureconfig.generic.auto._
-    val configSource = ConfigSource.default.load[Configuration]
-
-    Task.fromEither(
-      (err: ConfigReaderFailures) => new RuntimeException(s"Invalid configuration: $err")
-    )(configSource)
-  }
-
-  def createDb(config: DatabaseConf): Task[Database] = Task {
-    Database.forURL(
-      url = config.url,
-      user = config.user,
-      password = config.password,
-      driver = config.driver
-    )
-  }
-
-  def createQueryRunner(db: Database): QueryRunner[Task] = new QueryRunner[Task](db) {
-    override protected def converter[A]: Future[A] => Task[A] =
-      future => Task.deferFutureAction { implicit scheduler => future }
-  }
-
   def main(args: Array[String]): Unit = {
 
     def logic(config: Configuration, runner: QueryRunner[Task]): Task[Unit] = for {
@@ -103,10 +75,11 @@ object Main {
     } yield ()
 
     val program: Task[Unit] = for {
-      config  <- getConfiguration
+      config  <- Configuration.getConfiguration
       _       <- Migration.migrate(config.database)
-      db      <- createDb(config.database)
-      _       <- logic(config, createQueryRunner(db)).doOnFinish(_ => Task(db.close()))
+      db      <- DatabaseHelper.createDb(config.database)
+      runner   = DatabaseHelper.createQueryRunner(db)
+      _       <- logic(config, runner).doOnFinish(_ => Task(db.close()))
     } yield ()
 
     program

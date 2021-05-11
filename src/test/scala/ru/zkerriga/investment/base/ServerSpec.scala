@@ -11,6 +11,7 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
 
 import ru.zkerriga.investment.storage.queries._
+import ru.zkerriga.investment.storage.DatabaseHelper
 import ru.zkerriga.investment.configuration.{Configuration, DatabaseConf, Port, ServerConf}
 import ru.zkerriga.investment.logic.TinkoffOpenApiClient
 import ru.zkerriga.investment.{Main, Server}
@@ -58,13 +59,13 @@ class ServerSpec extends ServerISpecBase {
       TrackStocksQueryRepository.AllTrackStocks.schema ++
       NotificationsQueryRepository.AllNotifications.schema).create
 
-  private val configuration = Main.getConfiguration.runToFuture
+  private val configuration = Configuration.getConfiguration.runToFuture
 
   private val server: Future[Http.ServerBinding] = {
     configuration flatMap { config =>
       Server(
         Main.createServerRoutes(
-          Main.createQueryRunner(db),
+          DatabaseHelper.createQueryRunner(db),
           new TinkoffOpenApiClient(config.tinkoff.url, config.tinkoff.startBalance), serverConf)
       ).start(serverConf).runToFuture
     }
