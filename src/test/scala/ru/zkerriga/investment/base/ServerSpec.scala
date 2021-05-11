@@ -58,10 +58,10 @@ class ServerSpec extends ServerISpecBase {
       TrackStocksQueryRepository.AllTrackStocks.schema ++
       NotificationsQueryRepository.AllNotifications.schema).create
 
-  private val configuration = Main.getConfiguration
+  private val configuration = Main.getConfiguration.runToFuture
 
-  private def server: Future[Http.ServerBinding] = {
-    configuration.runToFuture flatMap { config =>
+  private val server: Future[Http.ServerBinding] = {
+    configuration flatMap { config =>
       Server(
         Main.createServerRoutes(
           Main.createQueryRunner(db),
