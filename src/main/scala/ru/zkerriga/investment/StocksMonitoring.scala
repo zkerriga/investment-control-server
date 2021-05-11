@@ -1,4 +1,4 @@
-package ru.zkerriga.investment.logic
+package ru.zkerriga.investment
 
 import com.typesafe.scalalogging.LazyLogging
 import monix.eval.Task
@@ -6,6 +6,7 @@ import scala.concurrent.duration._
 
 import ru.zkerriga.investment.entities.TinkoffToken
 import ru.zkerriga.investment.entities.openapi.MarketOrderRequest
+import ru.zkerriga.investment.logic.OpenApiClient
 import ru.zkerriga.investment.storage.MonitoringDao
 import ru.zkerriga.investment.storage.entities.{Notification, TrackStock}
 
