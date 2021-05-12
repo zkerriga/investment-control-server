@@ -1,7 +1,9 @@
 package ru.zkerriga.investment.logic
 
+import cats.data.EitherT
 import monix.eval.Task
 
+import ru.zkerriga.investment.ResponseError
 import ru.zkerriga.investment.entities.TinkoffToken
 import ru.zkerriga.investment.entities.openapi._
 
@@ -11,11 +13,13 @@ import ru.zkerriga.investment.entities.openapi._
  * https://tinkoffcreditsystems.github.io/invest-openapi/swagger-ui
  */
 trait OpenApiClient {
-  def `/sandbox/register`(token: TinkoffToken): Task[TinkoffResponse[Empty]]
+  type Fail = ResponseError
 
-  def `/market/stocks`(token: TinkoffToken): Task[TinkoffResponse[Stocks]]
+  def `/sandbox/register`(token: TinkoffToken): EitherT[Task, Fail, TinkoffResponse[Empty]]
 
-  def `/orders/market-order`(token: TinkoffToken, figi: String, marketOrder: MarketOrderRequest): Task[TinkoffResponse[PlacedMarketOrder]]
+  def `/market/stocks`(token: TinkoffToken): EitherT[Task, Fail, TinkoffResponse[Stocks]]
 
-  def `/market/orderbook`(token: TinkoffToken, figi: String): Task[TinkoffResponse[OrderBook]]
+  def `/orders/market-order`(token: TinkoffToken, figi: String, marketOrder: MarketOrderRequest): EitherT[Task, Fail, TinkoffResponse[PlacedMarketOrder]]
+
+  def `/market/orderbook`(token: TinkoffToken, figi: String): EitherT[Task, Fail, TinkoffResponse[OrderBook]]
 }

@@ -1,6 +1,7 @@
 package ru.zkerriga.investment.logic
 
 import akka.actor.ActorSystem
+import monix.eval.Task
 import monix.execution.Scheduler
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AsyncFunSuite
@@ -29,7 +30,7 @@ trait TinkoffOpenApiClientTest extends AsyncFunSuite with BeforeAndAfterAll {
       assert(figi.nonEmpty)
       assert(buyRes.payload.status === "Fill")
       assert(orderBook.payload.depth === 20)
-    }).runToFuture
+    }).valueOrF(_ => Task.now(fail())).runToFuture
   }
 
 }

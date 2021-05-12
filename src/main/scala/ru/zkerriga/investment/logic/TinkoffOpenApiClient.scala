@@ -6,9 +6,11 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.HttpMethods.{GET, POST}
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.{FromResponseUnmarshaller, Unmarshal}
+import cats.data.EitherT
 import io.circe.Encoder
 import monix.eval.Task
 
+import ru.zkerriga.investment.ResponseError
 import ru.zkerriga.investment.entities.TinkoffToken
 import ru.zkerriga.investment.entities.openapi._
 
@@ -20,11 +22,11 @@ class TinkoffOpenApiClient(uri: String, startBalance: SandboxSetCurrencyBalanceR
   import io.circe.generic.auto._
   import io.circe.syntax._
 
-  def `/sandbox/register`(token: TinkoffToken): Task[TinkoffResponse[Empty]] =
-    request[TinkoffResponse[Empty]](POST, "/sandbox/register", token) <*
-      `/sandbox/currencies/balance`(token, startBalance)
+  override def `/sandbox/register`(token: TinkoffToken): EitherT[Task, Fail, TinkoffResponse[Empty]] =
+    request[TinkoffResponse[Empty]](POST, "/sandbox/register", token) flatMap
+      (_ => `/sandbox/currencies/balance`(token, startBalance))
 
-  private def `/sandbox/currencies/balance`(token: TinkoffToken, balance: SandboxSetCurrencyBalanceRequest): Task[TinkoffResponse[Empty]] =
+  private def `/sandbox/currencies/balance`(token: TinkoffToken, balance: SandboxSetCurrencyBalanceRequest): EitherT[Task, Fail, TinkoffResponse[Empty]] =
     request[TinkoffResponse[Empty]](
       POST,
       "/sandbox/currencies/balance",
@@ -32,10 +34,10 @@ class TinkoffOpenApiClient(uri: String, startBalance: SandboxSetCurrencyBalanceR
       jsonRequestEntity(balance)
     )
 
-  def `/market/stocks`(token: TinkoffToken): Task[TinkoffResponse[Stocks]] =
+  override def `/market/stocks`(token: TinkoffToken): EitherT[Task, Fail, TinkoffResponse[Stocks]] =
     request[TinkoffResponse[Stocks]](GET, "/market/stocks", token)
 
-  def `/orders/market-order`(token: TinkoffToken, figi: String, marketOrder: MarketOrderRequest): Task[TinkoffResponse[PlacedMarketOrder]] =
+  override def `/orders/market-order`(token: TinkoffToken, figi: String, marketOrder: MarketOrderRequest): EitherT[Task, Fail, TinkoffResponse[PlacedMarketOrder]] =
     request[TinkoffResponse[PlacedMarketOrder]](
       POST,
       s"/orders/market-order?figi=$figi",
@@ -43,7 +45,7 @@ class TinkoffOpenApiClient(uri: String, startBalance: SandboxSetCurrencyBalanceR
       jsonRequestEntity(marketOrder)
     )
 
-  def `/market/orderbook`(token: TinkoffToken, figi: String): Task[TinkoffResponse[OrderBook]] =
+  override def `/market/orderbook`(token: TinkoffToken, figi: String): EitherT[Task, Fail, TinkoffResponse[OrderBook]] =
     request[TinkoffResponse[OrderBook]](GET, s"/market/orderbook?figi=$figi&depth=20", token)
 
   private def jsonRequestEntity[A](entity: A)(implicit encoder: Encoder[A]): RequestEntity =
@@ -54,7 +56,7 @@ class TinkoffOpenApiClient(uri: String, startBalance: SandboxSetCurrencyBalanceR
       path: String,
       token: TinkoffToken,
       entity: RequestEntity = HttpEntity.Empty
-    ): Task[U] = Task.deferFutureAction { implicit scheduler =>
+    ): EitherT[Task, Fail, U] = EitherT(Task.deferFutureAction { implicit scheduler =>
 
     Http().singleRequest(
       HttpRequest(
@@ -62,6 +64,9 @@ class TinkoffOpenApiClient(uri: String, startBalance: SandboxSetCurrencyBalanceR
         entity = entity,
         uri = s"$uri$path"
       ).addCredentials(HttpCredentials.createOAuth2BearerToken(token.token))
-    ).flatMap { response => Unmarshal(response).to[U] }
-  }
+    ).flatMap { response =>
+      Unmarshal(response).to[U].map(Right.apply)
+        .recover { case _ => Left(ResponseError())}
+    }
+  })
 }

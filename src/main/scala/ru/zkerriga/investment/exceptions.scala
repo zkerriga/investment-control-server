@@ -22,3 +22,8 @@ final case class PageNotFound()
 
 final case class NotEnoughBalance()
   extends ServiceException("Not enough balance")
+
+final case class ResponseError()
+
+final case class InternalError(code: String)
+  extends ServiceException(s"Internal error with code: $code")
