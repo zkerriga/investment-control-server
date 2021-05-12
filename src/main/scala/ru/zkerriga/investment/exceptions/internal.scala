@@ -1,7 +1,7 @@
 package ru.zkerriga.investment.exceptions
 
 
-sealed abstract class ServerInternalError(message: String) extends Throwable
+sealed abstract class ServerInternalError(message: String) extends ServerError(message)
 
 final case class DatabaseError()
   extends ServerInternalError("Database request error")

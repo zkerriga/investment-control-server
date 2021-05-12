@@ -1,6 +1,6 @@
 package ru.zkerriga.investment.exceptions
 
-sealed abstract class ServiceError(message: String) extends Throwable
+sealed abstract class ServiceError(message: String) extends ServerError(message)
 
 sealed abstract class AuthenticationError(message: String)
   extends ServiceError(message)
