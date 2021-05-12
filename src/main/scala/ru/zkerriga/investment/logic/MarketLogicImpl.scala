@@ -21,7 +21,8 @@ class MarketLogicImpl(dao: ClientDao, openApiClient: OpenApiClient) extends Mark
       .leftMap(Left.apply)
       .flatMap {
         case TinkoffResponse(_, _, stocks) =>
-          EitherT.fromEither(sliceStocks(stocks, page, onPage))
+          EitherT.fromEither[Task](sliceStocks(stocks, page, onPage))
+            .leftMap(Right.apply)
       }
 
   def registerStockInDb(id: Long, order: StockOrder): EitherT[Task, DatabaseError, Unit] =

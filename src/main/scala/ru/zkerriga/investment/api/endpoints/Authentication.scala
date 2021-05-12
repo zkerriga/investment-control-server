@@ -19,7 +19,7 @@ trait Authentication {
                 (implicit s: Scheduler): AuthFunction =
     credentials =>
         (for {
-          client    <- eh.recover(verifyLogic.verifyCredentials(credentials))
+          client    <- eh.recoverEither(verifyLogic.verifyCredentials(credentials))
           verified  <- eh.recover(verifyLogic.verifyToken(client))
         } yield verified).value.runToFuture
 

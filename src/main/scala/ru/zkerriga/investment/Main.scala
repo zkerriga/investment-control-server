@@ -11,7 +11,8 @@ import ru.zkerriga.investment.api.endpoints._
 import ru.zkerriga.investment.entities.TinkoffToken
 import ru.zkerriga.investment.storage._
 import ru.zkerriga.investment.configuration._
-import ru.zkerriga.investment.monitoring.StocksMonitoring
+import ru.zkerriga.investment.monitoring.StocksMonitoringImpl
+import ru.zkerriga.investment.exceptions.ServerInternalError
 
 
 object Main {
@@ -23,7 +24,7 @@ object Main {
 
   def createServerRoutes(runner: QueryRunner[Task], apiClient: OpenApiClient, config: ServerConf): ServerRoutes = {
     val encryption: AsyncBcrypt               = new AsyncBcryptImpl
-    val exceptionHandler                      = ExceptionHandlerForTask()
+    val exceptionHandler                      = new ExceptionHandlerEitherTImpl
 
     val loginDao: LoginDao                    = new LoginDaoImpl(runner)
     val clientDao: ClientDao                  = new ClientDaoImpl(runner)
@@ -56,9 +57,9 @@ object Main {
     } yield ()
   }
 
-  def initMonitor(queryRunner: QueryRunner[Task], openApiClient: OpenApiClient, token: TinkoffToken): Task[Unit] = {
+  def initMonitor(queryRunner: QueryRunner[Task], openApiClient: OpenApiClient, token: TinkoffToken): Task[Either[ServerInternalError, Unit]] = {
     val dao     = new MonitoringDaoImpl(queryRunner)
-    val monitor = new StocksMonitoring(openApiClient, dao, token)
+    val monitor = new StocksMonitoringImpl(openApiClient, dao, token)
     monitor.start
   }
 

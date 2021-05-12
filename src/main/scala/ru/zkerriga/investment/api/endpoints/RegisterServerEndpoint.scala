@@ -20,7 +20,7 @@ class RegisterServerEndpoint(
   exceptionHandler: ExceptionHandler[Task, EitherT])(implicit s: Scheduler) extends Endpoints[Future] {
 
   private def authorizeWithoutToken(credentials: UsernamePassword): Future[Either[ExceptionResponse, Client]] =
-    exceptionHandler.handle(verifyLogic.verifyCredentials(credentials)).runToFuture
+    exceptionHandler.handleEither(verifyLogic.verifyCredentials(credentials)).runToFuture
 
   private val register =
     RegisterEndpoint.register
