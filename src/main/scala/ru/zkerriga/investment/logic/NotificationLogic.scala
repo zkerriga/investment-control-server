@@ -1,16 +1,14 @@
 package ru.zkerriga.investment.logic
 
+import cats.data.EitherT
 import monix.eval.Task
 
 import ru.zkerriga.investment.entities.{Notifications, VerifiedClient}
+import ru.zkerriga.investment.exceptions.DatabaseError
 
 
 trait NotificationLogic {
 
-  /**
-   * Accesses the database and generates a list of notifications for the client
-   * @return all notifications for the client
-   */
-  def getAllNotifications(client: VerifiedClient): Task[Notifications]
+  def getAllNotifications(client: VerifiedClient): EitherT[Task, DatabaseError, Notifications]
 
 }
