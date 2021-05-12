@@ -10,7 +10,7 @@ import cats.data.EitherT
 import io.circe.Encoder
 import monix.eval.Task
 
-import ru.zkerriga.investment.ResponseError
+import ru.zkerriga.investment.exceptions.OpenApiResponseError
 import ru.zkerriga.investment.entities.TinkoffToken
 import ru.zkerriga.investment.entities.openapi._
 
@@ -21,6 +21,8 @@ class TinkoffOpenApiClient(uri: String, startBalance: SandboxSetCurrencyBalanceR
   import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
   import io.circe.generic.auto._
   import io.circe.syntax._
+
+  type Fail = OpenApiResponseError
 
   override def `/sandbox/register`(token: TinkoffToken): EitherT[Task, Fail, TinkoffResponse[Empty]] =
     request[TinkoffResponse[Empty]](POST, "/sandbox/register", token) flatMap
@@ -66,7 +68,7 @@ class TinkoffOpenApiClient(uri: String, startBalance: SandboxSetCurrencyBalanceR
       ).addCredentials(HttpCredentials.createOAuth2BearerToken(token.token))
     ).flatMap { response =>
       Unmarshal(response).to[U].map(Right.apply)
-        .recover { case _ => Left(ResponseError())}
+        .recover { case _ => Left(OpenApiResponseError(path)) }
     }
   })
 }
