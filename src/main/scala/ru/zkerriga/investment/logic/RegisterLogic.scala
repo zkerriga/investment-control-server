@@ -1,28 +1,17 @@
 package ru.zkerriga.investment.logic
 
+import cats.data.EitherT
 import monix.eval.Task
 
+import ru.zkerriga.investment.exceptions.{InvalidToken, ServerInternalError, UsernameAlreadyExist}
 import ru.zkerriga.investment.entities.{Login, TinkoffToken}
 import ru.zkerriga.investment.storage.entities.Client
 
 
 trait RegisterLogic {
 
-  /**
-   * Register a new client with a unique login.
-   *
-   * @return the username if the operation was successful,
-   *         and a LoginAlreadyExist exception otherwise
-   */
-  def registerClient(login: Login): Task[String]
+  def registerClient(login: Login): EitherT[Task, UsernameAlreadyExist, Unit]
 
-  /**
-   * Updates the token of an existing token.
-   *
-   * @param client must exist in the database!
-   * @return the username if the operation was successful, and a InvalidToken exception
-   *         otherwise
-   */
-  def updateToken(client: Client, token: TinkoffToken): Task[String]
+  def updateToken(client: Client, token: TinkoffToken): EitherT[Task, Either[ServerInternalError, InvalidToken], Unit]
 
 }

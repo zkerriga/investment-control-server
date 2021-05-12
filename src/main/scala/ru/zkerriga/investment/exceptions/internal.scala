@@ -1,10 +1,13 @@
 package ru.zkerriga.investment.exceptions
 
 
-sealed abstract class InternalError(message: String) extends Throwable
+sealed abstract class ServerInternalError(message: String) extends Throwable
 
 final case class DatabaseError()
-  extends InternalError("Database request error")
+  extends ServerInternalError("Database request error")
 
 final case class OpenApiResponseError(response: String)
-  extends InternalError(s"OpenAPI request error: $response")
+  extends ServerInternalError(s"OpenAPI request error: $response")
+
+final case class ProgrammedError(message: String)
+  extends ServerInternalError(message)
