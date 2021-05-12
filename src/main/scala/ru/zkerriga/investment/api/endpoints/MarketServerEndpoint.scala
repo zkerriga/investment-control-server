@@ -20,7 +20,7 @@ class MarketServerEndpoint(verifyLogic: VerifyLogic, marketLogic: MarketLogic, e
       .serverLogicPart(authorizeF(verifyLogic, exceptionHandler))
       .andThen {
         case (client, (page, onPage)) =>
-          exceptionHandler.handle(marketLogic.getStocks(client, page, onPage)).runToFuture
+          exceptionHandler.handleEither(marketLogic.getStocks(client, page, onPage)).runToFuture
       }
 
   override def endpoints: List[ServerEndpoint[_, ExceptionResponse, Stocks, Any, Future]] =

@@ -21,7 +21,7 @@ class OrdersServerEndpoint(
     OrdersEndpoint.marketOrder
       .serverLogicPart(authorizeF(verifyLogic, exceptionHandler))
       .andThen {
-        case (client, stockOrder) => exceptionHandler.handle(
+        case (client, stockOrder) => exceptionHandler.handleEither(
           marketLogic.buyStocks(client, stockOrder)
         ).runToFuture
       }

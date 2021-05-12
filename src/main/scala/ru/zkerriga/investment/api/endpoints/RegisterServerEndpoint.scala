@@ -33,7 +33,7 @@ class RegisterServerEndpoint(
       .serverLogicPart(authorizeWithoutToken)
       .andThen {
         case (client: Client, token: TinkoffToken) =>
-          exceptionHandler.handle(registerLogic.updateToken(client, token)).runToFuture
+          exceptionHandler.handleEither(registerLogic.updateToken(client, token)).runToFuture
       }
 
   override def endpoints: List[ServerEndpoint[_, ExceptionResponse, Unit, Any, Future]] =
