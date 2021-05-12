@@ -23,6 +23,7 @@ trait RegisterEndpoint {
       .description("Checks if the username is free and registers a new client")
       .in("register")
       .in(jsonBody[Login])
+      .out(jsonBody[Unit])
       .errorOut(jsonBody[ExceptionResponse].description("The login may be busy"))
 
   private[api] lazy val updateToken: Endpoint[(UsernamePassword, TinkoffToken), ExceptionResponse, Unit, Any] =
@@ -31,6 +32,7 @@ trait RegisterEndpoint {
       .description("Checks the validity of the token from Tinkoff-OpenAPI and enters it in the client data")
       .in("update" / "token")
       .in(jsonBody[TinkoffToken])
+      .out(jsonBody[Unit])
 
 }
 

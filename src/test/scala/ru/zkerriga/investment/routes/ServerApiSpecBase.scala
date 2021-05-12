@@ -52,6 +52,7 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
   private val testOrderResponse = PlacedMarketOrder("ae1-12c", "Buy", "Fill", None, None, 1, 1)
   private val testNotifications = Notifications(1, Seq(NotificationMessage(testStockOrder, "Sold")))
 
+/*
   describe(s"POST $link/register") {
     it("register a new client") {
       (mockRegisterLogic.registerClient _)
@@ -200,6 +201,9 @@ trait ServerApiSpecBase extends AnyFunSpec with ServerConfiguration with Scalate
       }
     }
   }
+*/
+  describe("fail") { it("fail") { fail() } }
+
 
   protected val mockRegisterLogic: RegisterLogic = mock[RegisterLogic]
   protected val mockVerifyLogic: VerifyLogic = mock[VerifyLogic]

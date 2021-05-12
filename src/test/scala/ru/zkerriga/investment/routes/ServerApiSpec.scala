@@ -12,7 +12,7 @@ class ServerApiSpec extends ServerApiSpecBase {
   implicit val s: Scheduler = monix.execution.Scheduler.global
 
   override def route: Route = {
-    val exceptionHandler = ExceptionHandlerForTask()
+    val exceptionHandler = new ExceptionHandlerEitherTImpl
     new ServerRoutesImpl(
       List(
         new RegisterServerEndpoint(mockRegisterLogic, mockVerifyLogic, exceptionHandler),
