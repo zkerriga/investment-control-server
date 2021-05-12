@@ -8,6 +8,7 @@ import ru.zkerriga.investment.api._
 import ru.zkerriga.investment.api.endpoints._
 
 
+/*
 class ServerApiSpec extends ServerApiSpecBase {
   implicit val s: Scheduler = monix.execution.Scheduler.global
 
@@ -25,3 +26,4 @@ class ServerApiSpec extends ServerApiSpecBase {
   }
 
 }
+*/

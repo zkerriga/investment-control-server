@@ -13,7 +13,7 @@ class MarketLogicImpl(dao: ClientDao, openApiClient: OpenApiClient) extends Mark
 
   def sliceStocks(stocks: Stocks, page: Int, onPage: Int): Either[PageNotFound, Stocks] = {
     val sliced = stocks.instruments.slice(onPage * (page - 1), onPage * page)
-    Either.cond(sliced.isEmpty, Stocks(sliced.size, sliced), PageNotFound())
+    Either.cond(sliced.nonEmpty, Stocks(sliced.size, sliced), PageNotFound())
   }
 
   override def getStocks(client: VerifiedClient, page: Int, onPage: Int): EitherT[Task, Either[OpenApiResponseError, PageNotFound], Stocks] =
