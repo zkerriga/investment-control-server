@@ -1,18 +1,10 @@
 package ru.zkerriga.investment.api
 
-import monix.eval.Task
+import ru.zkerriga.investment.exceptions.ServerError
 
 
-trait ExceptionHandler[F[_]] {
-  def handle[A](task: F[A]): F[Either[ExceptionResponse, A]]
-}
+trait ExceptionHandler[F[_], M[T[_], _, _]] {
+  def handle[A, E <: ServerError](logic: M[F, E, A]): F[Either[ExceptionResponse, A]]
 
-object ExceptionHandlerForTask {
-  def apply(): ExceptionHandler[Task] = new ExceptionHandler[Task] {
-    override def handle[A](task: Task[A]): Task[Either[ExceptionResponse, A]] =
-      task.redeem(
-        error => Left(ExceptionResponse(error.getMessage)),
-        result => Right(result)
-      )
-  }
+  def recover[A, E <: ServerError](logic: M[F, E, A]): M[F, ExceptionResponse, A]
 }
