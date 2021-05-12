@@ -11,6 +11,7 @@ import ru.zkerriga.investment.api.endpoints._
 import ru.zkerriga.investment.entities.TinkoffToken
 import ru.zkerriga.investment.storage._
 import ru.zkerriga.investment.configuration._
+import ru.zkerriga.investment.monitoring.StocksMonitoring
 
 
 object Main {

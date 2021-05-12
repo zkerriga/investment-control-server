@@ -1,4 +1,4 @@
-package ru.zkerriga.investment
+package ru.zkerriga.investment.monitoring
 
 import cats.data.EitherT
 import com.typesafe.scalalogging.LazyLogging
@@ -12,7 +12,7 @@ import ru.zkerriga.investment.logic.OpenApiClient
 import ru.zkerriga.investment.storage.MonitoringDao
 import ru.zkerriga.investment.storage.entities.{Notification, TrackStock}
 
-
+/* todo: make test with private[monitoring] */
 class StocksMonitoring(openApiClient: OpenApiClient, dao: MonitoringDao, token: TinkoffToken) extends LazyLogging {
 
   type FIGI = String
