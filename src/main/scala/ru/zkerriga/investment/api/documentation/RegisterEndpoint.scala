@@ -17,22 +17,21 @@ trait RegisterEndpoint {
     ApiEndpoint.baseEndpoint
       .tag("registration")
 
-  private[api] lazy val register: Endpoint[Login, ExceptionResponse, String, Any] =
+  private[api] lazy val register: Endpoint[Login, ExceptionResponse, Unit, Any] =
     baseApiRegistration.post
       .summary("Registers a client")
       .description("Checks if the username is free and registers a new client")
       .in("register")
       .in(jsonBody[Login])
-      .out(jsonBody[String].description("Returns the username in case of successful registration"))
       .errorOut(jsonBody[ExceptionResponse].description("The login may be busy"))
 
-  private[api] lazy val updateToken: Endpoint[(UsernamePassword, TinkoffToken), ExceptionResponse, String, Any] =
+  private[api] lazy val updateToken: Endpoint[(UsernamePassword, TinkoffToken), ExceptionResponse, Unit, Any] =
     baseApiRegistration.put.withAuth
       .summary("Updates the token")
       .description("Checks the validity of the token from Tinkoff-OpenAPI and enters it in the client data")
       .in("update" / "token")
       .in(jsonBody[TinkoffToken])
-      .out(jsonBody[String].description("Returns the username in case of successful registration"))
+
 }
 
 object RegisterEndpoint extends RegisterEndpoint

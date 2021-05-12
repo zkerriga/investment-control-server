@@ -1,5 +1,6 @@
 package ru.zkerriga.investment.api.endpoints
 
+import cats.data.EitherT
 import monix.eval.Task
 import monix.execution.Scheduler
 import sttp.tapir.server.ServerEndpoint
@@ -11,7 +12,7 @@ import ru.zkerriga.investment.api.documentation.MarketEndpoint
 import ru.zkerriga.investment.api.{ExceptionHandler, ExceptionResponse}
 
 
-class MarketServerEndpoint(verifyLogic: VerifyLogic, marketLogic: MarketLogic, exceptionHandler: ExceptionHandler[Task])(implicit s: Scheduler)
+class MarketServerEndpoint(verifyLogic: VerifyLogic, marketLogic: MarketLogic, exceptionHandler: ExceptionHandler[Task, EitherT])(implicit s: Scheduler)
   extends Endpoints[Future] with Authentication {
 
   private val stocks =

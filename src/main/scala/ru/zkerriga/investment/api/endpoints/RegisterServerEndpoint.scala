@@ -1,5 +1,6 @@
 package ru.zkerriga.investment.api.endpoints
 
+import cats.data.EitherT
 import monix.eval.Task
 import monix.execution.Scheduler
 import sttp.tapir.model.UsernamePassword
@@ -13,8 +14,10 @@ import ru.zkerriga.investment.logic.{RegisterLogic, VerifyLogic}
 import ru.zkerriga.investment.storage.entities.Client
 
 
-class RegisterServerEndpoint(registerLogic: RegisterLogic, verifyLogic: VerifyLogic, exceptionHandler: ExceptionHandler[Task])(implicit s: Scheduler)
-  extends Endpoints[Future] {
+class RegisterServerEndpoint(
+  registerLogic: RegisterLogic,
+  verifyLogic: VerifyLogic,
+  exceptionHandler: ExceptionHandler[Task, EitherT])(implicit s: Scheduler) extends Endpoints[Future] {
 
   private def authorizeWithoutToken(credentials: UsernamePassword): Future[Either[ExceptionResponse, Client]] =
     exceptionHandler.handle(verifyLogic.verifyCredentials(credentials)).runToFuture
@@ -33,6 +36,6 @@ class RegisterServerEndpoint(registerLogic: RegisterLogic, verifyLogic: VerifyLo
           exceptionHandler.handle(registerLogic.updateToken(client, token)).runToFuture
       }
 
-  override def endpoints: List[ServerEndpoint[_, ExceptionResponse, String, Any, Future]] =
+  override def endpoints: List[ServerEndpoint[_, ExceptionResponse, Unit, Any, Future]] =
     List(register, updateToken)
 }
