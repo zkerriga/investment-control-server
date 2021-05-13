@@ -11,17 +11,12 @@ import ru.zkerriga.investment.storage.ClientDao
 
 class MarketLogicImpl(dao: ClientDao, openApiClient: OpenApiClient) extends MarketLogic {
 
-  def sliceStocks(stocks: Stocks, page: Int, onPage: Int): Either[PageNotFound, Stocks] = {
-    val sliced = stocks.instruments.slice(onPage * (page - 1), onPage * page)
-    Either.cond(sliced.nonEmpty, Stocks(sliced.size, sliced), PageNotFound())
-  }
-
   override def getStocks(client: VerifiedClient, page: Int, onPage: Int): EitherT[Task, Either[OpenApiResponseError, PageNotFound], Stocks] =
     openApiClient.`/market/stocks`(client.token)
       .leftMap(Left.apply)
       .flatMap {
         case TinkoffResponse(_, _, stocks) =>
-          EitherT.fromEither[Task](sliceStocks(stocks, page, onPage))
+          EitherT.fromEither[Task](MarketLogicImpl.sliceStocks(stocks, page, onPage))
             .leftMap(Right.apply)
       }
 
@@ -37,5 +32,14 @@ class MarketLogicImpl(dao: ClientDao, openApiClient: OpenApiClient) extends Mark
             .leftMap(err => Left(err).withRight[NotEnoughBalance])
             .map(_ => response)
       }
+
+}
+
+object MarketLogicImpl {
+
+  def sliceStocks(stocks: Stocks, page: Int, onPage: Int): Either[PageNotFound, Stocks] = {
+    val sliced = stocks.instruments.slice(onPage * (page - 1), onPage * page)
+    Either.cond(sliced.nonEmpty, Stocks(sliced.size, sliced), PageNotFound())
+  }
 
 }

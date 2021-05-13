@@ -9,15 +9,18 @@ import ru.zkerriga.investment.exceptions.OpenApiResponseError
 import ru.zkerriga.investment.logic.OpenApiClient
 
 
-class TestOpenApiClient extends OpenApiClient {
+object TestOpenApiClient extends OpenApiClient {
+
+  val stocks22: Stocks = Stocks(
+    22,
+    Seq.fill(22)(Stock("A1B2", "", "", None, lot = 10, None, currency = "USD", name = "A Inc."))
+  )
+
   override def `/sandbox/register`(token: TinkoffToken): EitherT[Task, OpenApiResponseError, TinkoffResponse[Empty]] =
     EitherT.rightT(TinkoffResponse[Empty]("", "Ok", Empty()))
 
   override def `/market/stocks`(token: TinkoffToken): EitherT[Task, OpenApiResponseError, TinkoffResponse[Stocks]] =
-    EitherT.rightT(TinkoffResponse[Stocks](
-      "", "Ok",
-      Stocks(22, Seq.fill(22)(Stock("A1B2", "", "", None, lot = 10, None, currency = "USD", name = "A Inc.")))
-    ))
+    EitherT.rightT(TinkoffResponse[Stocks]("", "Ok", stocks22))
 
   override def `/orders/market-order`(token: TinkoffToken, figi: String, marketOrder: MarketOrderRequest): EitherT[Task, OpenApiResponseError, TinkoffResponse[PlacedMarketOrder]] =
     EitherT.rightT(TinkoffResponse[PlacedMarketOrder](

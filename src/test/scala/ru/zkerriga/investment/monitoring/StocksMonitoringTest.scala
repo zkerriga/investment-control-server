@@ -1,6 +1,5 @@
 package ru.zkerriga.investment.monitoring
 
-import org.scalamock.scalatest.MockFactory
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -11,7 +10,7 @@ import ru.zkerriga.investment.exceptions._
 import ru.zkerriga.investment.storage.entities.{Notification, TrackStock}
 
 
-class StocksMonitoringTest extends AnyFlatSpec with Matchers with MockFactory {
+class StocksMonitoringTest extends AnyFlatSpec with Matchers {
 
   import monix.execution.Scheduler.Implicits.global
 
@@ -20,7 +19,7 @@ class StocksMonitoringTest extends AnyFlatSpec with Matchers with MockFactory {
 
   private def suite: (FakeMonitoringDao, StocksMonitoringImpl) = {
     val fakeDb = new FakeMonitoringDao
-    val monitoring = new StocksMonitoringImpl(new TestOpenApiClient, fakeDb, TinkoffToken(""))
+    val monitoring = new StocksMonitoringImpl(TestOpenApiClient, fakeDb, TinkoffToken(""))
     (fakeDb, monitoring)
   }
 
