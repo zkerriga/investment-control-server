@@ -8,6 +8,7 @@ import ru.zkerriga.investment.exceptions.{DatabaseError, IncorrectCredentials, T
 import ru.zkerriga.investment.entities.{TinkoffToken, VerifiedClient}
 import ru.zkerriga.investment.storage.LoginDao
 import ru.zkerriga.investment.storage.entities.Client
+import ru.zkerriga.investment.utils.AsyncBcrypt
 
 
 class VerifyLogicImpl(dao: LoginDao, bcrypt: AsyncBcrypt) extends VerifyLogic {

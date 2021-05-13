@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import monix.eval.Task
 import monix.execution.Scheduler
 
-import ru.zkerriga.investment.logging.Console
+import ru.zkerriga.investment.utils.{AsyncBcrypt, AsyncBcryptImpl, Console}
 import ru.zkerriga.investment.logic._
 import ru.zkerriga.investment.api._
 import ru.zkerriga.investment.api.endpoints._

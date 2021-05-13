@@ -1,4 +1,4 @@
-package ru.zkerriga.investment.logic
+package ru.zkerriga.investment.utils
 
 import com.typesafe.scalalogging.StrictLogging
 import monix.eval.Task

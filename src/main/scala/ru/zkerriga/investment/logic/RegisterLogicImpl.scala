@@ -7,6 +7,7 @@ import ru.zkerriga.investment.exceptions.{InvalidToken, ProgrammedError, ServerI
 import ru.zkerriga.investment.entities.{Login, TinkoffToken}
 import ru.zkerriga.investment.storage.LoginDao
 import ru.zkerriga.investment.storage.entities.Client
+import ru.zkerriga.investment.utils.AsyncBcrypt
 
 
 class RegisterLogicImpl(dao: LoginDao, bcrypt: AsyncBcrypt, openApiClient: OpenApiClient) extends RegisterLogic {
