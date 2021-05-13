@@ -11,7 +11,7 @@ import ru.zkerriga.investment.api.endpoints._
 import ru.zkerriga.investment.entities.TinkoffToken
 import ru.zkerriga.investment.storage._
 import ru.zkerriga.investment.configuration._
-import ru.zkerriga.investment.monitoring.StocksMonitoringImpl
+import ru.zkerriga.investment.monitoring._
 import ru.zkerriga.investment.exceptions.ServerInternalError
 
 
@@ -58,8 +58,8 @@ object Main {
   }
 
   def initMonitor(queryRunner: QueryRunner[Task], openApiClient: OpenApiClient, token: TinkoffToken): Task[Either[ServerInternalError, Unit]] = {
-    val dao     = new MonitoringDaoImpl(queryRunner)
-    val monitor = new StocksMonitoringImpl(openApiClient, dao, token)
+    val dao: MonitoringDao        = new MonitoringDaoImpl(queryRunner)
+    val monitor: StocksMonitoring = new StocksMonitoringImpl(openApiClient, dao, token)
     monitor.start
   }
 

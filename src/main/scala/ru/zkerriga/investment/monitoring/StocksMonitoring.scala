@@ -5,6 +5,6 @@ import monix.eval.Task
 import ru.zkerriga.investment.exceptions.ServerInternalError
 
 
-trait StockMonitoring {
+trait StocksMonitoring {
   def start: Task[Either[ServerInternalError, Unit]]
 }

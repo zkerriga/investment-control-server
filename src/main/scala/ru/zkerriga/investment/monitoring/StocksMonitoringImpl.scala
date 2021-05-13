@@ -14,7 +14,7 @@ import ru.zkerriga.investment.storage.entities.{Notification, TrackStock}
 
 
 class StocksMonitoringImpl(openApiClient: OpenApiClient, dao: MonitoringDao, token: TinkoffToken)
-  extends StockMonitoring with LazyLogging {
+  extends StocksMonitoring with LazyLogging {
 
   type FIGI = String
   type Price = Double
