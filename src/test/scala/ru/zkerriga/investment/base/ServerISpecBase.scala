@@ -10,7 +10,7 @@ import org.scalatest.funsuite.AsyncFunSuite
 import scala.concurrent.Future
 
 import ru.zkerriga.investment.entities.openapi.{PlacedMarketOrder, Stock, Stocks}
-import ru.zkerriga.investment.entities.{Login, StockOrder, TinkoffToken}
+import ru.zkerriga.investment.entities.{Login, Notifications, StockOrder, TinkoffToken}
 
 
 trait ServerISpecBase extends AsyncFunSuite with ServerConfiguration with BeforeAndAfterAll {
@@ -47,7 +47,7 @@ trait ServerISpecBase extends AsyncFunSuite with ServerConfiguration with Before
     val login = logins(4)
     for {
       _ <- registerClient(login)
-      _ <- updateToken(login, validToken) /* todo: add mock for openApi */
+      _ <- updateToken(login, validToken)
       stocks1 <- getStocks(login, Map("page" -> 1, "onPage" -> 2))
       stocks2 <- getStocks(login, Map("onPage" -> 2))
       stocks3 <- getStocks(login, Map.empty)
@@ -58,18 +58,20 @@ trait ServerISpecBase extends AsyncFunSuite with ServerConfiguration with Before
     }
   }
 
-  test("buy stocks") {
+  test("buy stocks and get notifications") {
     val login = logins(5)
     for {
       _ <- registerClient(login)
       _ <- updateToken(login, validToken)
       stocks <- getStocks(login, Map.empty)
       figi = stocks.instruments.collectFirst{ case Stock(figi, _, _, _, _, _, "USD", _) => figi }
-      buyRes <- buyStocks(login, StockOrder(figi = figi.getOrElse(""), lots = 1, stopLoss = 1.0, takeProfit = 100.0))
+      notifications <- getNotifications(login)
+      buyRes <- buyStocks(login, StockOrder(figi = figi.getOrElse(""), lots = 1, stopLoss = 1.0, takeProfit = 1000.0))
     } yield {
       assert(stocks.total > 0)
       assert(figi.nonEmpty)
       assert(buyRes.executedLots === 1 && buyRes.requestedLots === 1)
+      assert(notifications.total === 0 && notifications.notifications.isEmpty)
     }
   }
 
@@ -89,6 +91,12 @@ trait ServerISpecBase extends AsyncFunSuite with ServerConfiguration with Before
   private def getStocks(login: Login, queryArgs: Map[String, Int]): Future[Stocks] =
     SimpleHttpClient.get[Stocks](
       uri = Uri(s"$link/market/stocks" ++ queryArgs.map{ case (s, i) => s"$s=$i" }.mkString("?", "&", "")),
+      toCredentials(login)
+    )
+
+  private def getNotifications(login: Login): Future[Notifications] =
+    SimpleHttpClient.get[Notifications](
+      uri = Uri(s"$link/notifications/all"),
       toCredentials(login)
     )
 
