@@ -40,7 +40,7 @@ class ServerRoutesImpl(endpoints: List[Endpoints[Future]], config: ServerConf) e
   private val swagger = new SwaggerAkka(openapi.toYaml, contextPath, yamlName).routes
 
   private val redirectToDocs: Route =
-    redirect(s"${ServerConf.getUri(config)}/$contextPath", StatusCodes.PermanentRedirect)
+    redirect(s"/$contextPath", StatusCodes.PermanentRedirect)
 
   override def routes: Route =
     AkkaHttpServerInterpreter.toRoute(allEndpoints) ~ swagger ~ redirectToDocs
