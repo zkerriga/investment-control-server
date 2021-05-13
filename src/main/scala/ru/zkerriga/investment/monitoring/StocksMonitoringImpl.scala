@@ -26,13 +26,6 @@ class StocksMonitoringImpl(openApiClient: OpenApiClient, dao: MonitoringDao, tok
       case TinkoffResponse(_, _, orderBook) => (figi, orderBook.lastPrice)
     }
 
-  def filterStocksForSale(stocks: Seq[TrackStock], stockPrices: Map[FIGI, Price]): Seq[TrackStock] =
-    stocks.filter { stock =>
-      stockPrices.get(stock.figi).fold(false) { price =>
-        price >= stock.takeProfit || price <= stock.stopLoss
-      }
-    }
-
   def sendRequestToSaleStocks(stocks: Seq[TrackStock]): Task[Seq[Either[OpenApiResponseError, (Id, Response)]]] =
     Task.parTraverseUnordered(stocks) { stock =>
       openApiClient.`/orders/market-order`(
@@ -55,15 +48,6 @@ class StocksMonitoringImpl(openApiClient: OpenApiClient, dao: MonitoringDao, tok
       _ <- markSoldStocksUntrackedInDb(idWithResponses)
     } yield ()
 
-  def convertToNotifications(stocks: Seq[TrackStock]): Seq[Notification] =
-    stocks collect {
-      case TrackStock(Some(id), clientId, _, _, _, _, _) =>
-        Notification(None, clientId = clientId, trackStockId = id)
-    }
-
-  def addNotificationsToDb(notifications: Seq[Notification]): EitherT[Task, DatabaseError, Unit] =
-    dao.addNotifications(notifications)
-
   def getStockPrices(figiSeq: Seq[FIGI]): Task[Map[FIGI, Price]] =
     Task.parTraverseUnordered(figiSeq) { figi =>
       getStockPrice(figi).value
@@ -74,7 +58,7 @@ class StocksMonitoringImpl(openApiClient: OpenApiClient, dao: MonitoringDao, tok
     )
 
   def parAddNotificationsAndSale(notifications: Seq[Notification], stocks: Seq[TrackStock]): EitherT[Task, DatabaseError, Unit] =
-    EitherT(Task.parZip2(addNotificationsToDb(notifications).value, saleStocks(stocks).value) map {
+    EitherT(Task.parZip2(dao.addNotifications(notifications).value, saleStocks(stocks).value) map {
       case (notificationEither, stocksEither) => for {
         _ <- notificationEither
         _ <- stocksEither
@@ -90,8 +74,8 @@ class StocksMonitoringImpl(openApiClient: OpenApiClient, dao: MonitoringDao, tok
     trackedStocks   <- dao.getAllTrackedStocks
     stockPricesMap  <- EitherT.right(getStockPrices(trackedStocks.map(_.figi).distinct))
 
-    stocksForSale = filterStocksForSale(trackedStocks, stockPricesMap)
-    notifications = convertToNotifications(stocksForSale)
+    stocksForSale = StocksMonitoringImpl.filterStocksForSale(trackedStocks, stockPricesMap)
+    notifications = StocksMonitoringImpl.convertToNotifications(stocksForSale)
 
     _ <- parAddNotificationsAndSale(notifications, stocksForSale)
     _ <- EitherT.right(logInfo(trackedStocks.size, stocksForSale.size))
@@ -102,4 +86,21 @@ class StocksMonitoringImpl(openApiClient: OpenApiClient, dao: MonitoringDao, tok
     loop
       .value
       .delayExecution(5.seconds)
+}
+
+object StocksMonitoringImpl {
+
+  def filterStocksForSale(stocks: Seq[TrackStock], stockPrices: Map[String, Double]): Seq[TrackStock] =
+    stocks.filter { stock =>
+      stockPrices.get(stock.figi).fold(false) { price =>
+        price >= stock.takeProfit || price <= stock.stopLoss
+      }
+    }
+
+  def convertToNotifications(stocks: Seq[TrackStock]): Seq[Notification] =
+    stocks collect {
+      case TrackStock(Some(id), clientId, _, _, _, _, _) =>
+        Notification(None, clientId = clientId, trackStockId = id)
+    }
+
 }
