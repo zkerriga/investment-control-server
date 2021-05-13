@@ -11,6 +11,13 @@ import ru.zkerriga.investment.storage.ClientDao
 
 class NotificationLogicImpl(dao: ClientDao) extends NotificationLogic {
 
+  override def getAllNotifications(client: VerifiedClient): EitherT[Task, DatabaseError, Notifications] =
+    dao.getAllNotificationsAndMarkThemSent(client.id) map NotificationLogicImpl.createNotifications
+
+}
+
+object NotificationLogicImpl {
+
   def createNotifications(notificationsInfoWithTrackStocks: Seq[(Notification, TrackStock)]): Notifications =
     Notifications(
       total = notificationsInfoWithTrackStocks.size,
@@ -19,8 +26,5 @@ class NotificationLogicImpl(dao: ClientDao) extends NotificationLogic {
         case (_, trackStock) => NotificationMessage(StockOrder.from(trackStock), "Sold")
       }
     )
-
-  override def getAllNotifications(client: VerifiedClient): EitherT[Task, DatabaseError, Notifications] =
-    dao.getAllNotificationsAndMarkThemSent(client.id) map createNotifications
 
 }
