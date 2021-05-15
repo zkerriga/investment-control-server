@@ -39,8 +39,8 @@ libraryDependencies ++= Seq(
   "io.monix" %% "monix" % "3.3.0",
 
   // logging
-  "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
-  "org.slf4j" % "slf4j-simple" % "1.7.28",
+  "ch.qos.logback" % "logback-classic" % "1.2.3",
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.9.3",
 
   // encryption
   "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0",
