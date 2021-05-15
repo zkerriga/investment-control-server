@@ -1,5 +1,6 @@
 <configuration>
     <logger name="slick" level="OFF" />
+    <logger name="org.flywaydb" level="INFO" />
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>

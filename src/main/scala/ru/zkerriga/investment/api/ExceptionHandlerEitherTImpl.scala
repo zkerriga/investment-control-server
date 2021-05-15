@@ -11,12 +11,12 @@ class ExceptionHandlerEitherTImpl extends ExceptionHandler[Task, EitherT] with L
   private lazy val internalErrorResponse = ExceptionResponse("Internal error")
 
   def recoverF: ServerError => ExceptionResponse = {
-    case internalError: ServerInternalError =>
-      logger.info(internalError.getMessage)
-      internalErrorResponse
     case logicError: ServiceError => ExceptionResponse(logicError.getMessage)
+    case internalError: ServerInternalError =>
+      logger.error(internalError.getMessage)
+      internalErrorResponse
     case criticalError =>
-      logger.info(s"Unknown critical error: ${criticalError.getMessage}")
+      logger.error(s"Unknown critical error: ${criticalError.getMessage}")
       internalErrorResponse
   }
 

@@ -15,7 +15,8 @@ import ru.zkerriga.investment.api.endpoints.Endpoints
 import ru.zkerriga.investment.configuration.ServerConf
 
 
-class ServerRoutesImpl(endpoints: List[Endpoints[Future]], config: ServerConf) extends ServerRoutes {
+class ServerRoutesImpl(endpoints: List[Endpoints[Future]], traceDirectives: TraceDirectives, config: ServerConf)
+  extends ServerRoutes {
 
   import akka.http.scaladsl.server.RouteConcatenation._
 
@@ -43,5 +44,5 @@ class ServerRoutesImpl(endpoints: List[Endpoints[Future]], config: ServerConf) e
     redirect(s"/$contextPath", StatusCodes.PermanentRedirect)
 
   override def routes: Route =
-    AkkaHttpServerInterpreter.toRoute(allEndpoints) ~ swagger ~ redirectToDocs
+    traceDirectives.log(AkkaHttpServerInterpreter.toRoute(allEndpoints)) ~ swagger ~ redirectToDocs
 }

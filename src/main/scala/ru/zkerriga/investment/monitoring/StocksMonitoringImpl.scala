@@ -67,7 +67,7 @@ class StocksMonitoringImpl(openApiClient: OpenApiClient, dao: MonitoringDao, tok
 
   private def logInfo(trackedQuantity: Int, soldQuantity: Int): Task[Unit] =
     Task.now(
-      logger.info(s"""Supported: ${trackedQuantity - soldQuantity}, Sold: $soldQuantity""")
+      logger.debug(s"""Supported: ${trackedQuantity - soldQuantity}, Sold: $soldQuantity""")
     )
 
   private def loop: EitherT[Task, DatabaseError, Unit] = for {
